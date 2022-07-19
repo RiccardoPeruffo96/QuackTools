@@ -36,7 +36,7 @@
 
 /**
  * @brief this contains structs and classes
- * using to implements easly I/O operations
+ * using to implements easily I/O operations
  * and optimize them for each system
  */
 namespace _file_operations_rp96_

@@ -151,7 +151,7 @@ namespace _diffie_hellman_rp96_
   private:
     const uint32_t Q = 0xFFFFFFFB; ///< largest prime number with 32 bit
     const uint32_t ALPHA = 0x2; ///< coprime integers with Q, so gcd(q, alpha) = 1
-    const int32_t ZERO = 0; ///< auxiliary constants vars
+    //const int32_t ZERO = 0; //< auxiliary constants vars
     const int32_t CYCLES_128BITS = 4; ///< loop necessary to generate a 128bit random number
     const int32_t CYCLES_256BITS = 8; ///< loop necessary to generate a 256bit random number
 

@@ -548,7 +548,7 @@ std::string file_operations::get_last_error_as_string()
   //Free the Win32's string's buffer.
   LocalFree(message_buffer);
 
-  std::string res("error #" + (uint64_t)error_message_id);
+  std::string res("error #" + std::to_string(static_cast<uint64_t>(error_message_id)));
   res.append(": ");
   res += message;
 
@@ -559,7 +559,7 @@ std::string file_operations::get_last_error_as_string(int64_t err_value)
 {
   int64_t error_message_id = err_value;
   //Get the error message ID, if any
-  std::string res("error #" + error_message_id);
+  std::string res("error #" + std::to_string(static_cast<uint64_t>(error_message_id)));
   res.append(": ");
   res += strerror(error_message_id);
 

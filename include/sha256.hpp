@@ -164,7 +164,7 @@ namespace _sha256_rp96_
    * SHA256 preprocessing use 512 bits EVERY 128 input's bit!
    *
    * the namespace const SIZE_1GB_MESSAGE_LIST contains a superior limit
-   * to don't use a large amount of RAM and it can be easly modified.
+   * to don't use a large amount of RAM and it can be easily modified.
    * SIZE_1GB_MESSAGE_LIST can't be less than 1 (infinite loop).
    *
    * Also it use only std functions to enlarge the compatibily with

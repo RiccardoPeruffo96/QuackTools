@@ -171,11 +171,11 @@ int32_t MyFrame::ctrl_user_at_start()
   user_json.open(json_name_file, std::ifstream::in);
 
   //if user.json it's blocked, i turn off the program
-	if(user_json.is_open() == false)
-	{
-		__LOG_HEADER(__LOG_GET) << "I can't open user.json for some reason, maybe an third process?\n";
-		return -1;
-	}
+  if(user_json.is_open() == false)
+  {
+    __LOG_HEADER(__LOG_GET) << "I can't open user.json for some reason, maybe an third process?\n";
+    return -1;
+  }
 
   Json::Reader reader;
   //reader.parse(file_json, user_json);
@@ -183,7 +183,7 @@ int32_t MyFrame::ctrl_user_at_start()
   {
     //there are file corruptions of json file
     __LOG_HEADER(__LOG_GET) << "I can't open user.json for some reason, maybe an users/users.json corruptions file?\n";
-		return -1;
+    return -1;
   }
   user_json.close();
 
@@ -986,9 +986,9 @@ wxPanel* MyFrame::sha256_panel_cr(wxWindow* parent)
   choose_file->SetFocus();
 
   upper_grid->Add(from_file, 1, wxALIGN_CENTER);
-  upper_grid->Add(choose_file_btn, 0.8, wxEXPAND);
+  upper_grid->Add(choose_file_btn, 0, wxEXPAND);
   upper_grid->Add(each_line, 1, wxALIGN_CENTER);
-  upper_grid->Add(choose_file, 0.8, wxALIGN_CENTER);
+  upper_grid->Add(choose_file, 0, wxALIGN_CENTER);
 
   //end first line
   wxTextCtrl* input_sha256 = new wxTextCtrl(this_wxpanel, sha256_txtctrl_input, wxEmptyString, wxDefaultPosition, wxSize(425, 50), wxTE_MULTILINE);
@@ -999,9 +999,9 @@ wxPanel* MyFrame::sha256_panel_cr(wxWindow* parent)
   wxButton* sha256_btn_start = new wxButton(this_wxpanel, id_button_calc_sha256, wxT("START"), wxDefaultPosition, wxSize(425, 50));
 
   sha256_grid_sizer->Add(upper_grid, 1, wxEXPAND);
-  sha256_grid_sizer->Add(input_sha256, 0.8, wxEXPAND);
-  sha256_grid_sizer->Add(output_sha256, 0.8, wxEXPAND);
-  sha256_grid_sizer->Add(sha256_btn_start, 0.8, wxEXPAND);
+  sha256_grid_sizer->Add(input_sha256, 0, wxEXPAND);
+  sha256_grid_sizer->Add(output_sha256, 0, wxEXPAND);
+  sha256_grid_sizer->Add(sha256_btn_start, 0, wxEXPAND);
 
   sha256_wxboxsizer->Add(sha256_grid_sizer, 1, wxEXPAND);
 
@@ -1084,11 +1084,11 @@ wxPanel* MyFrame::hide_panel_cr(wxWindow* parent)
 
   btn_grid->Add(hide_btn_start, 1, wxEXPAND);
 
-  hide_grid_sizer->Add(file_grid, 0.5, wxALIGN_CENTER);
-  hide_grid_sizer->Add(img_grid, 0.5, wxALIGN_CENTER);
-  hide_grid_sizer->Add(encrypt_grid, 0.5, wxALIGN_CENTER);
-  hide_grid_sizer->Add(output_grid, 0.5, wxALIGN_CENTER);
-  hide_grid_sizer->Add(btn_grid, 0.5, wxALIGN_CENTER);
+  hide_grid_sizer->Add(file_grid, 0, wxALIGN_CENTER);
+  hide_grid_sizer->Add(img_grid, 0, wxALIGN_CENTER);
+  hide_grid_sizer->Add(encrypt_grid, 0, wxALIGN_CENTER);
+  hide_grid_sizer->Add(output_grid, 0, wxALIGN_CENTER);
+  hide_grid_sizer->Add(btn_grid, 0, wxALIGN_CENTER);
 
 
   hide_wxboxsizer->Add(hide_grid_sizer, 1, wxEXPAND);
@@ -1162,10 +1162,10 @@ wxPanel* MyFrame::seek_panel_cr(wxWindow* parent)
 
   btn_grid->Add(seek_btn_start, 1, wxEXPAND);
 
-  seek_grid_sizer->Add(img_grid, 0.5, wxALIGN_CENTER);
-  seek_grid_sizer->Add(encrypt_grid, 0.5, wxALIGN_CENTER);
-  seek_grid_sizer->Add(output_grid, 0.5, wxALIGN_CENTER);
-  seek_grid_sizer->Add(btn_grid, 0.5, wxALIGN_CENTER);
+  seek_grid_sizer->Add(img_grid, 0, wxALIGN_CENTER);
+  seek_grid_sizer->Add(encrypt_grid, 0, wxALIGN_CENTER);
+  seek_grid_sizer->Add(output_grid, 0, wxALIGN_CENTER);
+  seek_grid_sizer->Add(btn_grid, 0, wxALIGN_CENTER);
 
   seek_wxboxsizer->Add(seek_grid_sizer, 1, wxEXPAND);
 
@@ -1244,11 +1244,11 @@ wxPanel* MyFrame::aes256_panel_cr(wxWindow* parent)
 
   btn_grid->Add(aes256_btn_start, 1, wxEXPAND);
 
-  aes256_grid_sizer->Add(radiobox_grid, 0.5, wxALIGN_CENTER);
-  aes256_grid_sizer->Add(file_grid, 0.5, wxALIGN_CENTER);
-  aes256_grid_sizer->Add(encrypt_grid, 0.5, wxALIGN_CENTER);
-  aes256_grid_sizer->Add(output_grid, 0.5, wxALIGN_CENTER);
-  aes256_grid_sizer->Add(btn_grid, 0.5, wxALIGN_CENTER);
+  aes256_grid_sizer->Add(radiobox_grid, 0, wxALIGN_CENTER);
+  aes256_grid_sizer->Add(file_grid, 0, wxALIGN_CENTER);
+  aes256_grid_sizer->Add(encrypt_grid, 0, wxALIGN_CENTER);
+  aes256_grid_sizer->Add(output_grid, 0, wxALIGN_CENTER);
+  aes256_grid_sizer->Add(btn_grid, 0, wxALIGN_CENTER);
 
 
   aes256_wxboxsizer->Add(aes256_grid_sizer, 1, wxEXPAND);
@@ -1305,15 +1305,15 @@ wxPanel* MyFrame::b64_panel_cr(wxWindow* parent)
   b64_standard_opts.Add(default_opts);
   b64_standard_opts.Add(wxT("RFC4648 URL"));
   b64_standard_opts.Add(wxT("RFC3501 STD"));
-  /*parent	Parent window. Must not be NULL.
-    id	Window identifier. The value wxID_ANY indicates a default value.
-    value	Initial selection string. An empty string indicates no selection.
-    pos	Window position.
-    size	Window size. If wxDefaultSize is specified then the window is sized appropriately.
-    choices	An array of strings with which to initialise the control.
-    style	Window style. See wxComboBox.
-    validator	Window validator.
-    name	Window name.
+  /*parent  Parent window. Must not be NULL.
+    id  Window identifier. The value wxID_ANY indicates a default value.
+    value  Initial selection string. An empty string indicates no selection.
+    pos  Window position.
+    size  Window size. If wxDefaultSize is specified then the window is sized appropriately.
+    choices  An array of strings with which to initialise the control.
+    style  Window style. See wxComboBox.
+    validator  Window validator.
+    name  Window name.
 */
   wxComboBox* b64_standard = new wxComboBox(
     this_wxpanel,
@@ -1333,14 +1333,14 @@ wxPanel* MyFrame::b64_panel_cr(wxWindow* parent)
   wxGridSizer* select_file_n_standard = new wxGridSizer(1, 2, 0, 5);
 
   select_file_n_standard->Add(b64_standard, 1, wxEXPAND);
-  select_file_n_standard->Add(choose_file_btn, 0.8, wxEXPAND);
+  select_file_n_standard->Add(choose_file_btn, 0, wxEXPAND);
 
   upper_grid->Add(radbtn_enc, 1, wxALIGN_CENTER);
   upper_grid->Add(from_file, 1, wxALIGN_CENTER);
-  upper_grid->Add(select_file_n_standard, 0.8, wxEXPAND);
+  upper_grid->Add(select_file_n_standard, 0, wxEXPAND);
   upper_grid->Add(radbtn_dec, 1, wxALIGN_CENTER);
   upper_grid->Add(each_line, 1, wxALIGN_CENTER);
-  upper_grid->Add(choose_file, 0.8, wxALIGN_CENTER);
+  upper_grid->Add(choose_file, 0, wxALIGN_CENTER);
 
   //end first line
   wxTextCtrl* input_b64 = new wxTextCtrl(this_wxpanel, b64_txtctrl_input, wxEmptyString, wxDefaultPosition, wxSize(425, 50), wxTE_MULTILINE);
@@ -1351,9 +1351,9 @@ wxPanel* MyFrame::b64_panel_cr(wxWindow* parent)
   wxButton* b64_btn_start = new wxButton(this_wxpanel, id_button_calc_b64, wxT("START"), wxDefaultPosition, wxSize(425, 50));
 
   b64_grid_sizer->Add(upper_grid, 1, wxEXPAND);
-  b64_grid_sizer->Add(input_b64, 0.8, wxEXPAND);
-  b64_grid_sizer->Add(output_b64, 0.8, wxEXPAND);
-  b64_grid_sizer->Add(b64_btn_start, 0.8, wxEXPAND);
+  b64_grid_sizer->Add(input_b64, 0, wxEXPAND);
+  b64_grid_sizer->Add(output_b64, 0, wxEXPAND);
+  b64_grid_sizer->Add(b64_btn_start, 0, wxEXPAND);
 
   b64_wxboxsizer->Add(b64_grid_sizer, 1, wxEXPAND);
 
@@ -1412,11 +1412,11 @@ wxPanel* MyFrame::dfhl_panel_cr(wxWindow* parent)
 
   btn_grid->Add(dfhl_btn_start, 1, wxEXPAND);
 
-  dfhl_grid_sizer->Add(radiobox_grid, 0.5, wxALIGN_CENTER);
-  dfhl_grid_sizer->Add(input_public_dfhl, 0.5, wxALIGN_CENTER);
-  dfhl_grid_sizer->Add(input_secret_dfhl, 0.5, wxALIGN_CENTER);
-  dfhl_grid_sizer->Add(output_dfhl, 0.5, wxALIGN_CENTER);
-  dfhl_grid_sizer->Add(btn_grid, 0.5, wxALIGN_CENTER);
+  dfhl_grid_sizer->Add(radiobox_grid, 0, wxALIGN_CENTER);
+  dfhl_grid_sizer->Add(input_public_dfhl, 0, wxALIGN_CENTER);
+  dfhl_grid_sizer->Add(input_secret_dfhl, 0, wxALIGN_CENTER);
+  dfhl_grid_sizer->Add(output_dfhl, 0, wxALIGN_CENTER);
+  dfhl_grid_sizer->Add(btn_grid, 0, wxALIGN_CENTER);
 
   dfhl_wxboxsizer->Add(dfhl_grid_sizer, 1, wxEXPAND);
 

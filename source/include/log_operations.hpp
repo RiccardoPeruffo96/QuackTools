@@ -12,13 +12,13 @@ namespace _log_operations_rp96_
   {
   public:
 
-  	static log_operations& get_instance()
+    static log_operations& get_instance()
     {
-  		static log_operations instance;
-  		return instance;
-  	}
+      static log_operations instance;
+      return instance;
+    }
 
-  	/*std::ofstream log_write()
+    /*std::ofstream log_write()
     {
       return pointer_log;
     } */
