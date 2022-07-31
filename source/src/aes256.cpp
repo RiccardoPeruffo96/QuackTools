@@ -226,18 +226,28 @@ aes256::~aes256()
 
 uint8_t aes256::char_to_hex(char tmp)
 {
+  //convert a char in the hex value
+  //letter 'a' or 'A' become 0x0A == 0d10
+  //letter 'f' or 'F' become 0x0F == 0d15
+  //letter '6'        become 0x06 == 0d06
   static const char downcase = 'a' - 0xA;
   static const char uppercase = 'A' - 0xA;
 
-  if (tmp >= 'a') //tmp >= 97
-    return tmp - downcase; //tmp - 'a' == 0 -> 0 + 0xA == 0xA
-  if (tmp >= 'A') //tmp >= 65
-    return tmp - uppercase; //tmp - 'A' == 0 -> 0 + 0xA == 0xA
-  return tmp - '0'; //tmp -= 48
+  if (tmp >= 'a') //tmp >= 0d97
+    {
+      return tmp - downcase;
+    } //tmp - 'a' == 0 -> 0 + 0x0A == 0x0A
+  if (tmp >= 'A') //tmp >= 0d65
+    {
+      return tmp - uppercase;
+    } //tmp - 'A' == 0 -> 0 + 0x0A == 0x0A
+  return tmp - '0'; //tmp -= 0d48
 }
 
 void aes256::xor_op(uint8_t* block, wrapper_128bits& key)
 {
+  //it's a xor op between every
+  //element about block and key
   for (int32_t i = 0; i < DIM_ARRAY; ++i)
   {
     block[i] ^= key.array_form[i];
@@ -246,14 +256,24 @@ void aes256::xor_op(uint8_t* block, wrapper_128bits& key)
 
 void aes256::shift_rows(uint8_t* block)
 {
+  //think about a block like a DIM_MATRIX*DIM_MATRIX matrix
+  //there are 4 rows and 4 columns
+  //index about rows and cols are between 0..3
+  //the second row (index == 1) turn up about 1
   rotate_up<1, 1>(block, DIM_MATRIX, DIM_MATRIX);
+  //the third row turn up about 2
   rotate_up<2, 2>(block, DIM_MATRIX, DIM_MATRIX);
+  //the fourth row turn up about 3
   rotate_up<3, 3>(block, DIM_MATRIX, DIM_MATRIX);
 }
 
 void aes256::sub_bytes(uint8_t* block, const wrapper_2048bits& s_box)
 {
-  for (int32_t i = 0; i < DIM_ARRAY; block[i] = s_box.array_form[static_cast<uint8_t>(block[i])], ++i);
+  //it's a substitution about 1 bytes for every cycle
+  for (int32_t i = 0; i < DIM_ARRAY; ++i)
+  {
+    block[i] = s_box.array_form[static_cast<uint8_t>(block[i])];
+  }
 }
 
 void aes256::mix_columns(uint8_t* block)
@@ -385,6 +405,19 @@ void aes256::decrypt()
   {
     this->value_CMS = padding_value;
     this->length_payload = this->length_payload - padding_value;
+  }
+
+  if(this->value_CMS > 0)
+  {
+    uint64_t tmp_len_payload = static_cast<uint64_t>(this->length_payload);
+    for(int32_t i = 0; i < DIM_ARRAY - this->value_CMS; ++i, ++tmp_len_payload)
+    {
+      this->final_pad.array_form[static_cast<uint64_t>(i)] = this->payload[tmp_len_payload];
+    }
+    for(int32_t i = DIM_ARRAY - this->value_CMS; i < DIM_ARRAY; ++i)
+    {
+      this->final_pad.array_form[static_cast<uint64_t>(i)] = this->value_CMS;
+    }
   }
 
   this->i_have_encrypt = false;
@@ -869,7 +902,7 @@ int64_t aes256::get_length_payload()
 
 uint8_t* aes256::get_final_block()
 {
-  if (this->value_CMS == 0 || this->i_have_decrypt == true)
+  if (this->value_CMS == 0)// || this->i_have_decrypt == true)
   {
     return nullptr;
   }

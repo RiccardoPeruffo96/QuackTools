@@ -1,9 +1,14 @@
+/**
+ * @author Peruffo Riccardo, RP96, riccardoperuffo96@gmail.com, github.com/RiccardoPeruffo96
+ * @date 2022
+ * @file tests_unit.hpp
+ */
+
 #ifndef TESTS_RP96_HPP_
 #define TESTS_RP96_HPP_
 
+#include <iostream>
 #include <vector>
-
-//#include <catch2/catch_test_macros.hpp>
 
 #ifndef CATCH_CONFIG_MAIN
   #define CATCH_CONFIG_MAIN
@@ -16,13 +21,13 @@
 #include "sha256.hpp"
 #include "steganography.hpp"
 
-namespace _tests_header_rp96_
+namespace _tests_unit_rp96_
 {
   bool tests_sha256();
   bool tests_aes256();
   bool tests_base64();
   bool tests_diffie_hellman();
   bool tests_steganography();
-} //_tests_header_rp96_
+} //_tests_unit_rp96_
 
 #endif //TESTS_RP96_HPP_
