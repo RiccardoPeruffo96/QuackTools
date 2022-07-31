@@ -26,8 +26,8 @@ This program follows c++17 standards.
    3. ``cd build``
    4. ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..``
    5. ``make install``
-     * ``make test`` (optional)
-     * ``make doc`` (optional)
+        * ``make test`` (optional)
+        * ``make doc`` (optional)
    6. ``cd ..``
    7. ``./bin/QuackTools``
 
