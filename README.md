@@ -21,17 +21,17 @@ This program follows c++17 standards.
 ## How to use it
 
  * Linux systems: open the bash and follow the nexts commands:
-   1. git clone https://github.com/RiccardoPeruffo96/QuackTools.git
-   2. mkdir build
-   3. cd build
-   4. CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
-   5. make install
-   5.1. make test (optional)
-   5.2. make doc (optional)
-   6. cd ..
-   7. ./bin/QuackTools
+   1. ``git clone https://github.com/RiccardoPeruffo96/QuackTools.git``
+   2. ``mkdir build``
+   3. ``cd build``
+   4. ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..``
+   5. ``make install``
+     * ``make test`` (optional)
+     * ``make doc`` (optional)
+   6. ``cd ..``
+   7. ``./bin/QuackTools``
 
-Note: You can choose to use CC=clang CXX=clang++ instead CC=gcc CXX=g++
+Note: You can choose to use ``CC=clang CXX=clang++`` instead ``CC=gcc CXX=g++``
 
 ## Third party libreries
 
