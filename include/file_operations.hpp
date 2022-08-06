@@ -36,7 +36,7 @@
 
 /**
  * @brief this contains structs and classes
- * using to implements easily I/O operations
+ * using to implements easly I/O operations
  * and optimize them for each system
  */
 namespace _file_operations_rp96_
@@ -63,7 +63,7 @@ namespace _file_operations_rp96_
      * @param _size_file size
      * @param _struct_will_delete_pointer if true the destructor will dealloc the memory: default value is true
      */
-    file_pointer(uint8_t* _file_data, int64_t _size_file, bool _struct_will_delete_pointer = true)
+    file_pointer(uint8_t* _file_data, int64_t _size_file, bool _struct_will_delete_pointer = true) noexcept(true)
     {
       this->_file_data = _file_data;
       this->_size_file = _size_file;
@@ -82,7 +82,7 @@ namespace _file_operations_rp96_
      * @brief copy constructor
      * @param ref_fp object file_pointer& to copy
      */
-    file_pointer(const file_pointer& ref_fp) :
+    file_pointer(const file_pointer& ref_fp) noexcept(true):
       _file_data{ ref_fp._file_data },
       _size_file{ ref_fp._size_file },
       _struct_will_delete_pointer{ ref_fp._struct_will_delete_pointer }
@@ -96,7 +96,7 @@ namespace _file_operations_rp96_
      * you will have memory leak
      * @param ref_fp object file_pointer& to copy
      */
-    file_pointer& operator=(const file_pointer& ref_fp)
+    file_pointer& operator=(const file_pointer& ref_fp) noexcept(true)
     {
       this->~file_pointer();
 
@@ -111,7 +111,7 @@ namespace _file_operations_rp96_
      * @brief move constructor
      * @param ref_fp object file_pointer&& to swap
      */
-    file_pointer(file_pointer&& ref_fp) :
+    file_pointer(file_pointer&& ref_fp) noexcept(true):
       _file_data{ ref_fp._file_data },
       _size_file{ ref_fp._size_file },
       _struct_will_delete_pointer{ ref_fp._struct_will_delete_pointer }
@@ -129,7 +129,7 @@ namespace _file_operations_rp96_
      * you will have memory leak
      * @param ref_fp object file_pointer& to swap
      */
-    file_pointer& operator=(file_pointer&& ref_fp)
+    file_pointer& operator=(file_pointer&& ref_fp) noexcept(true)
     {
       this->~file_pointer();
 
@@ -149,7 +149,7 @@ namespace _file_operations_rp96_
      * set this->_struct_will_delete_pointer
      * flag false
      */
-    ~file_pointer()
+    ~file_pointer() noexcept(true)
     {
       if (this->_struct_will_delete_pointer == true)
       {
@@ -192,36 +192,36 @@ namespace _file_operations_rp96_
      * @param _file_name file's name in the program's directory
      * @param _is_read_only default value is false, if true I force to use read-only memory access
      */
-    file_operations(std::string _file_name, bool _is_read_only = false);
+    file_operations(std::string _file_name, bool _is_read_only = false) noexcept(true);
 
     /**
      * @brief copy constructor
      * @param ref_fo object file_operations& to copy
      */
-    file_operations(const file_operations& ref_fo);
+    file_operations(const file_operations& ref_fo) noexcept(true);
 
     /**
      * @brief copy assignment operator
      * @param ref_fo object file_operations& to copy
      */
-    file_operations& operator=(const file_operations& ref_fo);
+    file_operations& operator=(const file_operations& ref_fo) noexcept(true);
 
     /**
      * @brief move constructor
      * @param ref_fo object file_operations& to move
      */
-    file_operations(file_operations&& ref_fo);
+    file_operations(file_operations&& ref_fo) noexcept(true);
 
     /**
      * @brief move assignment operator
      * @param ref_fo object file_operations& to move
      */
-    file_operations& operator=(file_operations&& ref_fo);
+    file_operations& operator=(file_operations&& ref_fo) noexcept(true);
 
     /**
      * @brief free memory mapping or delete uint8_t*
      */
-    ~file_operations();
+    ~file_operations() noexcept(true);
 
     /**
      * @brief overwrite the file with input's uint8_t* or append it at the end
@@ -230,7 +230,7 @@ namespace _file_operations_rp96_
      * @param datas_size size of data, if equals to 0 then will be used this->_size_file
      * @param mode flags in OR like (std::trunc | std::out)
      */
-    static int32_t save_third_file(std::string output_file_name, std::list<file_pointer>& files, int32_t mode = 0);
+    static int32_t save_third_file(std::string& output_file_name, std::list<file_pointer>& files, int32_t mode = 0);
 
     /**
      * @brief overwrite this file with input's uint8_t* or append it at the end and recalculate mmap
@@ -316,7 +316,7 @@ namespace _file_operations_rp96_
      * @brief write
      * @param _is_read_only default value is false, if true I force to use read-only memory access
      */
-    static int32_t write_file(std::string file_output, uint8_t* datas, int64_t datas_size, int32_t mode = 0);
+    static int32_t write_file(std::string& file_output, uint8_t* datas, int64_t datas_size, int32_t mode = 0);
 
     /**
      * @brief to clean memory and release mmap

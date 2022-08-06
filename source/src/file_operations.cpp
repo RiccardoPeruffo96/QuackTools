@@ -10,10 +10,10 @@
 
 using namespace _file_operations_rp96_;
 
-file_operations::file_operations(std::string _file_name, bool _is_read_only)
+file_operations::file_operations(std::string _file_name, bool _is_read_only) noexcept(true)
 {
   //set global vars
-  this->_file_name = _file_name;
+  this->_file_name = std::move(_file_name);
   //then using a third-function to set everything
   //and store the return code
   auto result = this->set_constructor_vars(_is_read_only);
@@ -24,9 +24,10 @@ file_operations::file_operations(std::string _file_name, bool _is_read_only)
   }
 }
 
-file_operations::file_operations(const file_operations& ref_fo) :
-  _file_name{ ref_fo._file_name }
+file_operations::file_operations(const file_operations& ref_fo) noexcept(true)
 {
+  //set global vars
+  this->_file_name = ref_fo._file_name;
   //then using a third-function to set everything
   //and store the return code
   auto result = this->set_constructor_vars(ref_fo._is_read_only);
@@ -37,7 +38,7 @@ file_operations::file_operations(const file_operations& ref_fo) :
   }
 }
 
-file_operations& file_operations::operator=(const file_operations& ref_fo)
+file_operations& file_operations::operator=(const file_operations& ref_fo) noexcept(true)
 {
   this->~file_operations();
 
@@ -55,14 +56,15 @@ file_operations& file_operations::operator=(const file_operations& ref_fo)
   return *this;
 }
 
-file_operations::file_operations(file_operations&& ref_fo) :
-  _file_name{ ref_fo._file_name },
+file_operations::file_operations(file_operations&& ref_fo) noexcept(true):
   _size_file{ ref_fo._size_file },
   _data_file{ ref_fo._data_file },
   _can_we_read_the_file{ ref_fo._can_we_read_the_file },
   _is_read_only{ ref_fo._is_read_only },
   memory_is_clean{ ref_fo.memory_is_clean }
 {
+  this->_file_name = ref_fo._file_name;
+
   #if _WIN32 || _WIN64
   this->handle_file = ref_fo.handle_file;
   this->file_mapping = ref_fo.file_mapping;
@@ -82,7 +84,7 @@ file_operations::file_operations(file_operations&& ref_fo) :
   ref_fo.memory_is_clean = true;
 }
 
-file_operations& file_operations::operator=(file_operations&& ref_fo)
+file_operations& file_operations::operator=(file_operations&& ref_fo) noexcept(true)
 {
   this->~file_operations();
 
@@ -114,7 +116,7 @@ file_operations& file_operations::operator=(file_operations&& ref_fo)
   return *this;
 }
 
-file_operations::~file_operations()
+file_operations::~file_operations() noexcept(true)
 {
   //delete the actual mmap if setted
   auto result = this->clear();
@@ -341,7 +343,7 @@ int32_t file_operations::set_constructor_vars(bool _is_read_only)
   return 0;
 }
 
-int32_t file_operations::write_file(std::string file_output, uint8_t* datas, int64_t datas_size, int32_t mode)
+int32_t file_operations::write_file(std::string& file_output, uint8_t* datas, int64_t datas_size, int32_t mode)
 {
   //obj to save new file
   std::ofstream write_stream;
@@ -383,7 +385,7 @@ int32_t file_operations::write_file(std::string file_output, uint8_t* datas, int
   return 0;
 }
 
-int32_t file_operations::save_third_file(std::string output_file_name, std::list<file_pointer>& files, int32_t mode)
+int32_t file_operations::save_third_file(std::string& output_file_name, std::list<file_pointer>& files, int32_t mode)
 {
   if(files.empty() == true)
   {
@@ -409,7 +411,7 @@ int32_t file_operations::save_third_file(std::string output_file_name, std::list
   }
 
   //others can only use append mode
-  for (file_pointer file : files)
+  for (file_pointer& file : files)
   {
     if (file_operations::write_file(output_file_name, file._file_data, file._size_file, std::ofstream::app) == -1)
     {
@@ -489,7 +491,7 @@ int32_t file_operations::save_this_file(std::list<file_pointer>& files, bool i_w
   }
 
   //others can only use append mode
-  for (file_pointer file : files)
+  for (file_pointer& file : files)
   {
     if (file_operations::write_file(this->_file_name, file._file_data, file._size_file, std::ofstream::app) == -1)
     {

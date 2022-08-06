@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 set(ACTUAL_DIR ${CMAKE_SOURCE_DIR}/source)
 
@@ -14,10 +14,11 @@ find_package(Threads REQUIRED)
 find_package(wxWidgets REQUIRED COMPONENTS net core base)
 include(${wxWidgets_USE_FILE})
 
-find_package(jsoncpp REQUIRED)
-include_directories(${JSON_INC_PATH})
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
+link_libraries(${JSONCPP_LIBRARIES})
 
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads jsoncpp_lib ${OpenCV_LIBS} ${wxWidgets_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads ${JSONCPP_LIBRARIES} ${OpenCV_LIBS} ${wxWidgets_LIBRARIES} gcov)

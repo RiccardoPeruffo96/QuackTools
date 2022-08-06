@@ -18,6 +18,7 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     : wxFrame(nullptr, wxID_ANY, title, pos, size)
 {
+  this->one_or_more_user = true;
   int32_t control_user = ctrl_user_at_start();
 
   //check if i can use users.json
@@ -150,6 +151,7 @@ int32_t MyFrame::ctrl_user_at_start()
   {
     __LOG_HEADER(__LOG_GET) << "users folder doesn't found\n"; //save it in log file
     std::filesystem::create_directory(this->user_datas); //and create the folder
+    this->one_or_more_user = false;
   }
 
   std::filesystem::current_path(this->user_datas); //change directory in /users/
@@ -166,30 +168,34 @@ int32_t MyFrame::ctrl_user_at_start()
     user_json.open(json_name_file, std::ifstream::in | std::ifstream::out | std::ifstream::trunc);
     user_json << start_json;
     user_json.close();
+    this->one_or_more_user = false;
   }
 
   user_json.open(json_name_file, std::ifstream::in);
 
   //if user.json it's blocked, i turn off the program
-  if(user_json.is_open() == false)
-  {
-    __LOG_HEADER(__LOG_GET) << "I can't open user.json for some reason, maybe an third process?\n";
-    return -1;
-  }
+	if(user_json.is_open() == false)
+	{
+    this->one_or_more_user = false;
+		__LOG_HEADER(__LOG_GET) << "I can't open user.json for some reason, maybe an third process?\n";
+		return -1;
+	}
 
   Json::Reader reader;
   //reader.parse(file_json, user_json);
   if(reader.parse(user_json, file_json, true) == false)
   {
+    this->one_or_more_user = false;
     //there are file corruptions of json file
     __LOG_HEADER(__LOG_GET) << "I can't open user.json for some reason, maybe an users/users.json corruptions file?\n";
-    return -1;
+		return -1;
   }
   user_json.close();
 
   //if the are no elements, return 1, so the main panel is "new_user"
   if(file_json.size() == 0)
   {
+    this->one_or_more_user = false;
     return 1;
   }
 
@@ -217,6 +223,15 @@ void MyFrame::about_me(wxCommandEvent& event)
 
 void MyFrame::button_back(wxCommandEvent& event)
 {
+  if(this->one_or_more_user == false)
+  {
+    wxMessageBox(ZERO_USERS, //text
+                FATAL_ERROR, //title
+                wxOK | wxICON_INFORMATION); //type of message
+    event.Skip();
+    return;
+  }
+
   if (FindWindowById(wlcm_idpanel)->IsShown() == false)
   {
     switch_panel(wlcm_idpanel);
@@ -232,7 +247,7 @@ void MyFrame::button_back(wxCommandEvent& event)
   return;
 } //void MyFrame::button_back(wxCommandEvent& event)
 
-uint64_t MyFrame::check_non_exists_file(std::string name, std::string extension)
+uint64_t MyFrame::check_non_exists_file(const std::string& name, const std::string& extension)
 {
   uint64_t counter = 0;
   std::filesystem::path hypotetical_new_file{name};
@@ -397,10 +412,21 @@ void MyFrame::button_add_user(wxCommandEvent& event)
   wxTextCtrl* this_username = reinterpret_cast<wxTextCtrl*>(FindWindowById(this->_username_in_use));
   uint64_t len = static_cast<uint64_t>(this_password->GetValue().length());
 
+  if(this_username->GetValue().IsEmpty() == true)
+  {
+    wxMessageBox(USER_EMPTY,
+               ERROR_WARN,
+               wxOK | wxICON_INFORMATION);
+
+    event.Skip();
+    return;
+  }
+
   //username is unique
   //const char* user_field = "user";
   //const char* USER_NOT_UNIQUE = "The chosen username\nhas already been taken";
-  for (Json::Value::ArrayIndex idx_user = 0; idx_user < file_json.size(); idx_user++)
+  auto json_size = file_json.size();
+  for (Json::Value::ArrayIndex idx_user = 0; idx_user < json_size; idx_user++)
   {
     if(file_json[idx_user].isMember(USER_FIELD) == false)
     {
@@ -446,7 +472,7 @@ void MyFrame::button_add_user(wxCommandEvent& event)
   this->clear_pwd_label();
 
   //check every single letter, max pwd length == 100
-  bool lower, upper, number, symbol = false;
+  bool lower = false, upper = false, number = false, symbol = false;
   for(auto letter : pwd)
   {
     if(letter > 96 && letter < 123)
@@ -473,8 +499,6 @@ void MyFrame::button_add_user(wxCommandEvent& event)
   //every check need to be true
   if(!(lower && upper && number && symbol))
   {
-    std::cout << "wrong password - chars\n";
-
     if(!lower)
     {
       error_string += "lowercase letter miss";
@@ -561,6 +585,8 @@ void MyFrame::button_add_user(wxCommandEvent& event)
   }
   delete[] text;
   text = nullptr;
+
+  this->one_or_more_user = true;
 
   this->switch_panel(wlcm_idpanel);
 
@@ -1305,15 +1331,15 @@ wxPanel* MyFrame::b64_panel_cr(wxWindow* parent)
   b64_standard_opts.Add(default_opts);
   b64_standard_opts.Add(wxT("RFC4648 URL"));
   b64_standard_opts.Add(wxT("RFC3501 STD"));
-  /*parent  Parent window. Must not be NULL.
-    id  Window identifier. The value wxID_ANY indicates a default value.
-    value  Initial selection string. An empty string indicates no selection.
-    pos  Window position.
-    size  Window size. If wxDefaultSize is specified then the window is sized appropriately.
-    choices  An array of strings with which to initialise the control.
-    style  Window style. See wxComboBox.
-    validator  Window validator.
-    name  Window name.
+  /*parent	Parent window. Must not be NULL.
+    id	Window identifier. The value wxID_ANY indicates a default value.
+    value	Initial selection string. An empty string indicates no selection.
+    pos	Window position.
+    size	Window size. If wxDefaultSize is specified then the window is sized appropriately.
+    choices	An array of strings with which to initialise the control.
+    style	Window style. See wxComboBox.
+    validator	Window validator.
+    name	Window name.
 */
   wxComboBox* b64_standard = new wxComboBox(
     this_wxpanel,
@@ -1947,7 +1973,7 @@ void MyFrame::button_calc_hide(wxCommandEvent& event)
 
       delete[] tmp_data;
       tmp_data = nullptr;
-      tmp_len = -1;
+      //tmp_len = -1;
 
       //save in pwd_to_use
       pwd_to_use = std::string(hash_input.get_SHA256_string());
@@ -2190,7 +2216,7 @@ void MyFrame::button_calc_seek(wxCommandEvent& event)
 
       delete[] tmp_data;
       tmp_data = nullptr;
-      tmp_len = -1;
+      //tmp_len = -1;
 
       //save in pwd_to_use
       pwd_to_use = std::string(hash_input.get_SHA256_string());
@@ -2310,7 +2336,7 @@ void MyFrame::button_calc_aes256(wxCommandEvent& event)
     }
     delete[] tmp_data;
     tmp_data = nullptr;
-    tmp_len = -1;
+    //tmp_len = -1;
     //save in pwd_to_use
     pwd_to_use = std::string(hash_input.get_SHA256_string());
   }

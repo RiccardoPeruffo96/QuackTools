@@ -65,7 +65,7 @@ namespace _sha256_rp96_
     /**
      * @brief set private flags to false and other vars
      */
-    message()
+    message() noexcept(true)
     {
       this->_has_00_15_read = { false };
       this->_has_00_15_to_heap = { false };
@@ -77,7 +77,7 @@ namespace _sha256_rp96_
      * @brief copy constructor
      * @param msg object message& to copy
      */
-    message(const message& msg) :
+    message(const message& msg) noexcept(true):
       _has_00_15_read{ msg._has_00_15_read },
       _has_00_15_to_heap{ msg._has_00_15_to_heap },
       _message_00_15{ msg._message_00_15 }
@@ -94,7 +94,7 @@ namespace _sha256_rp96_
      * @brief copy assignment operator
      * @param msg object message& to copy
      */
-    message& operator=(const message& msg)
+    message& operator=(const message& msg) noexcept(true)
     {
       this->_has_00_15_read = msg._has_00_15_read;
       this->_has_00_15_to_heap = msg._has_00_15_to_heap;
@@ -111,7 +111,7 @@ namespace _sha256_rp96_
      * @brief move constructor
      * @param msg object message& to copy
      */
-    message(message&& msg) :
+    message(message&& msg) noexcept(true):
       _has_00_15_read{ msg._has_00_15_read },
       _has_00_15_to_heap{ msg._has_00_15_to_heap },
       _message_00_15{ msg._message_00_15 }
@@ -123,7 +123,7 @@ namespace _sha256_rp96_
      * @brief move assignment operator
      * @param msg object message& to swap
      */
-    message& operator=(message&& msg)
+    message& operator=(message&& msg) noexcept(true)
     {
       this->_has_00_15_read = msg._has_00_15_read;
       this->_has_00_15_to_heap = msg._has_00_15_to_heap;
@@ -144,7 +144,7 @@ namespace _sha256_rp96_
     /**
      * @brief destructor: clean memory if I can
      */
-    ~message()
+    ~message() noexcept(true)
     {
       if (this->_has_00_15_to_heap == false)
         return;
@@ -164,7 +164,7 @@ namespace _sha256_rp96_
    * SHA256 preprocessing use 512 bits EVERY 128 input's bit!
    *
    * the namespace const SIZE_1GB_MESSAGE_LIST contains a superior limit
-   * to don't use a large amount of RAM and it can be easily modified.
+   * to don't use a large amount of RAM and it can be easly modified.
    * SIZE_1GB_MESSAGE_LIST can't be less than 1 (infinite loop).
    *
    * Also it use only std functions to enlarge the compatibily with
@@ -182,38 +182,38 @@ namespace _sha256_rp96_
    * @param file_data pointer to data
    * @param size_data lenght data
    */
-    sha256(char* file_data, int64_t size_data);
+    sha256(char* file_data, int64_t size_data) noexcept(true);
 
   /**
    * @brief copy constructor
    * @param s256 object sha256& to copy
    */
-    sha256(const sha256& s256);
+    sha256(const sha256& s256) noexcept(true);
 
     /**
      * @brief copy assignment operator
      * @param s256 object sha256& to copy
      * @return a copy of input
      */
-    sha256& operator=(const sha256& s256);
+    sha256& operator=(const sha256& s256) noexcept(true);
 
     /**
      * @brief move constructor
      * @param s256 object sha256& to swap
      */
-    sha256(sha256&& s256);
+    sha256(sha256&& s256) noexcept(true);
 
     /**
      * @brief move assignment operator
      * @param s256 object sha256& to swap
      * @return a copy of input
      */
-    sha256& operator=(sha256&& s256);
+    sha256& operator=(sha256&& s256) noexcept(true);
 
  /**
    * @brief default destructor
    */
-    ~sha256() = default;
+    ~sha256() noexcept(true) = default;
 
    /**
      * @brief start the threads to calculate the hash

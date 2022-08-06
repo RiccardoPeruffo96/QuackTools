@@ -6,29 +6,6 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 
 set(TEST_PROJ_NAME tests)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-  #01: I print DEBUG
-  message("DEBUG mode")
-
-  #if compiler is gcc
-  if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-
-    #then I add the flag "-ggdb3"
-    target_compile_options(${PROJECT_NAME} PUBLIC "-ggdb3")
-
-  endif()
-
-#if we are in "Release" mode instead
-#  then cmake already adds "-O3 -DNDEBUG"
-#elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-else()
-
-  #01: I print RELEASE
-  message("RELEASE mode") # cmake already adds "-O3 -DNDEBUG"
-
-endif()
-
 set(ACTUAL_DIR_TEST ${CMAKE_SOURCE_DIR}/tests)
 file(GLOB_RECURSE local_test *.cpp *.hpp ../source/src/*.cpp)
 list(FILTER local_test EXCLUDE REGEX ".*gui\\.cpp$")

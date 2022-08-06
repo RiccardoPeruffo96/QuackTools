@@ -69,7 +69,7 @@ namespace _steganography_rp96_
      * @param img_name_input file's image name
      * @param img_name_output file's image new name
      */
-    static void hide_file(uint8_t* bytes_data_file, int64_t bytes_data_length, std::string img_name_input, std::string file_name_input, std::string img_name_output = "");
+    static void hide_file(uint8_t* bytes_data_file, int64_t bytes_data_length, const std::string& img_name_input, const std::string& file_name_input, std::string img_name_output = "");
 
    /**
      * @brief seek the data in the img at the string path, then return a char*. AAA: THE POINTER WILL NOT BE DELETE AUTOMATICALLY WHEN DECOSTRUCTOR OR OTHERS, WHO CALLS THE FUNCTION NEED TO KNOW HOW TO DO WITH THIS
@@ -78,7 +78,7 @@ namespace _steganography_rp96_
      * @param img_name_output file's image new name
      * @return pointer to datas
      */
-    static uint8_t* seek_file(std::string img_name_input, int64_t& bytes_data_length, std::string& file_name_output);
+    static uint8_t* seek_file(const std::string& img_name_input, int64_t& bytes_data_length, std::string& file_name_output);
 
   private:
 

@@ -33,11 +33,11 @@
  * {<br>
  * &nbsp;&nbsp;std::cout << my_aes256.get_payload()[i]; <em>//std::cout << input_file_data[i]; works well</em><br>
  * }<br>
- * if(my_aes256.get_final_block != nullptr)<br>
+ * if(my_aes256.get_final_block() != nullptr)<br>
  * {<br>
  * &nbsp;&nbsp;for(auto i = 0; i < my_aes256.get_final_block_size(); ++i)<br>
  * &nbsp;&nbsp;{<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;std::cout << my_aes256.get_final_block[i];<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;std::cout << my_aes256.get_final_block()[i];<br>
  * &nbsp;&nbsp;}<br>
  * }<br>
  * std::cout << "\n";<br>
@@ -195,27 +195,27 @@ namespace _aes256_rp96_
      * @param length_byte_file length's data_file
      * @param key a string that contains the key
      */
-    aes256(uint8_t* data_file, int64_t length_byte_file, std::string key);
+    aes256(uint8_t* data_file, int64_t length_byte_file, std::string key) noexcept(true);
 
     //rule of five
     /**
      * @brief copy constructors
      * @param a256 input to copy
      */
-    aes256(const aes256& a256);
+    aes256(const aes256& a256) noexcept(true);
 
     /**
      * @brief copy assignment operator
      * @param a256 input to copy
      * @return a input's copy
      */
-    aes256& operator=(const aes256& a256);
+    aes256& operator=(const aes256& a256) noexcept(true);
 
     /**
      * @brief move constructor
      * @param a256 input to swap
      */
-    aes256(aes256&& a256);
+    aes256(aes256&& a256) noexcept(true);
 
     /**
      *
@@ -223,12 +223,12 @@ namespace _aes256_rp96_
      * @param a256 input to swap
      * @return a input's copy
      */
-    aes256& operator=(aes256&& a256);
+    aes256& operator=(aes256&& a256) noexcept(true);
 
     /**
      * @brief destructor
      */
-    ~aes256();
+    ~aes256() noexcept(true);
 
     /**
      * @brief start to encrypt the stored input

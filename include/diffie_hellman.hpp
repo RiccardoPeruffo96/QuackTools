@@ -37,11 +37,7 @@ namespace _diffie_hellman_rp96_
      * @brief gives empty values to the private vars:
      * std::string privkey_str, std::string pubkey_str and std::string sharedkey_str
      */
-    diffie_hellman() :
-      privkey_str{ std::string("") },
-      pubkey_str{ std::string("") },
-      sharedkey_str{ std::string("") }
-    {}
+    diffie_hellman() noexcept(true);
 
     /**
      * @brief to create second half key store the string privkey_str
@@ -49,66 +45,25 @@ namespace _diffie_hellman_rp96_
      * @param privkey_stored_str value that will be padded in privkey_str
      * @param pubkey_received_str value that will be padded in pubkey_str
      */
-    diffie_hellman(std::string privkey_stored_str, std::string pubkey_received_str) :
-      privkey_str{ privkey_stored_str },
-      pubkey_str{ pubkey_received_str },
-      sharedkey_str{ std::string("") }
-    {}
+    diffie_hellman(std::string privkey_stored_str, std::string pubkey_received_str) noexcept(true);
 
     //rule of five
     ///copy constructors
-    diffie_hellman(const diffie_hellman& b64) :
-      privkey_str{ b64.privkey_str },
-      pubkey_str{ b64.pubkey_str },
-      sharedkey_str{ b64.sharedkey_str }
-    {}
+    diffie_hellman(const diffie_hellman& b64) noexcept(true);
 
     ///copy assignment operator
-    diffie_hellman& operator=(const diffie_hellman& b64)
-    {
-      //copy assignment operator is different between copy constructors because first i need to clear the actual data
-      //phase 1: clean + assign
-      this->privkey_str = b64.privkey_str;
-      this->pubkey_str = b64.privkey_str;
-      this->sharedkey_str = b64.privkey_str;
-      return *this;
-    }
+    diffie_hellman& operator=(const diffie_hellman& b64) noexcept(true);
 
     ///move constructor
-    diffie_hellman(diffie_hellman&& b64)
-    {
-      //phase 1: swap strings
-      std::swap(this->privkey_str, b64.privkey_str);
-      std::swap(this->pubkey_str, b64.pubkey_str);
-      std::swap(this->sharedkey_str, b64.sharedkey_str);
-      //phase 2: clean source
-      b64.privkey_str.clear();
-      b64.pubkey_str.clear();
-      b64.sharedkey_str.clear();
-    }
+    diffie_hellman(diffie_hellman&& b64) noexcept(true);
 
     ///move assignment operator
-    diffie_hellman& operator=(diffie_hellman&& b64)
-    {
-      if (this != &b64)
-      {
-        return *this;
-      }
-      //phase 1: swap strings
-      std::swap(this->privkey_str, b64.privkey_str);
-      std::swap(this->pubkey_str, b64.pubkey_str);
-      std::swap(this->sharedkey_str, b64.sharedkey_str);
-      //phase 2: clean source
-      b64.privkey_str.clear();
-      b64.pubkey_str.clear();
-      b64.sharedkey_str.clear();
-      return *this;
-    }
+    diffie_hellman& operator=(diffie_hellman&& b64) noexcept(true);
 
     /**
      * @brief default destructor
      */
-    ~diffie_hellman() = default;
+    ~diffie_hellman() noexcept(true) = default;
 
     /**
      * @brief generate a string with size == 32 hex char, that is a 128 bits half-key with DiffieHellman algorithm: the secret half key will be stored in privkey_str, the public half key will be stored in pubkey_str

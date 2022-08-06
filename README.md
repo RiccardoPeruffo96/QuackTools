@@ -18,7 +18,7 @@ This program is tested with Linux but should be work fine with others systems.
 
 This program follows c++17 standards.
 
-## How to use it
+## How to compile the source
 
  * Linux systems: open the bash and follow the nexts commands:
    1. ``git clone https://github.com/RiccardoPeruffo96/QuackTools.git``
@@ -28,10 +28,16 @@ This program follows c++17 standards.
    5. ``make install``
        * ``make test`` (optional)
        * ``make doc`` (optional)
-   6. ``cd ..``
-   7. ``./bin/QuackTools``
+   6. ``make run``
 
 Note: You can choose to use ``CC=gcc CXX=g++`` instead ``CC=clang CXX=clang++``
+
+## Different compile options
+
+ * To enable debug: ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..`` or ``CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..``
+   * after that the follow commands are enabled (you need to run ``make install``): ``make gdb`` and ``make valgrind``;
+ * To enable code coverage: ``CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=coverage -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..``
+   * after that the follow commands are enabled (you need to run ``make install`` then ``make run``): ``make cov`` to generate the code coverage at ``/codecoverage/coverage.html`` (you need to have gcov and gcovr)
 
 ## Third party libreries
 

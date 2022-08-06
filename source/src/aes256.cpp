@@ -10,7 +10,7 @@
 
 using namespace _aes256_rp96_;
 
-aes256::aes256(uint8_t* data_file, int64_t length_byte_file, std::string key) :
+aes256::aes256(uint8_t* data_file, int64_t length_byte_file, std::string key) noexcept(true) :
 payload{ data_file },
 length_payload{ 0 }
 {
@@ -121,7 +121,7 @@ length_payload{ 0 }
   this->i_have_decrypt = false;
 }
 
-aes256::aes256(const aes256& a256) :
+aes256::aes256(const aes256& a256) noexcept(true) :
   payload{ a256.payload },
   length_payload{ a256.length_payload },
   value_CMS{ a256.value_CMS },
@@ -137,7 +137,7 @@ aes256::aes256(const aes256& a256) :
   }
 }
 
-aes256& aes256::operator=(const aes256& a256)
+aes256& aes256::operator=(const aes256& a256) noexcept(true)
 {
   //copy assignment operator is different between copy constructors
   //because first i need to clear the actual data
@@ -156,7 +156,7 @@ aes256& aes256::operator=(const aes256& a256)
   return *this;
 }
 
-aes256::aes256(aes256&& a256) :
+aes256::aes256(aes256&& a256) noexcept(true) :
   payload{ a256.payload },
   length_payload{ a256.length_payload },
   value_CMS{ a256.value_CMS },
@@ -170,7 +170,7 @@ aes256::aes256(aes256&& a256) :
   }
 }
 
-aes256& aes256::operator=(aes256&& a256)
+aes256& aes256::operator=(aes256&& a256) noexcept(true)
 {
   if (this == &a256)
   {
@@ -193,7 +193,7 @@ aes256& aes256::operator=(aes256&& a256)
   return *this;
 }
 
-aes256::~aes256()
+aes256::~aes256() noexcept(true) 
 {
   //doesn't call delete because aes doesn't copy the data
   this->payload = nullptr;
@@ -407,6 +407,7 @@ void aes256::decrypt()
     this->length_payload = this->length_payload - padding_value;
   }
 
+  //------ test for unit test ------//
   if(this->value_CMS > 0)
   {
     uint64_t tmp_len_payload = static_cast<uint64_t>(this->length_payload);
@@ -419,6 +420,7 @@ void aes256::decrypt()
       this->final_pad.array_form[static_cast<uint64_t>(i)] = this->value_CMS;
     }
   }
+  //------ end test for unit test ------//
 
   this->i_have_encrypt = false;
   this->i_have_decrypt = true;

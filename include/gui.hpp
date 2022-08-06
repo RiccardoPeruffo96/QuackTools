@@ -72,7 +72,10 @@
   const char* ERROR_WARN = "User or password\nnot correct";
   const char* UNCORRECT_PASSWORD = "Uncorrect password";
   const char* USER_NOT_UNIQUE = "The chosen username\nhas already been taken";
+  const char* USER_EMPTY = "User cannot be empty";
   const char* ALREADY_HOMEPAGE = "You are already on homepage";
+
+  const char* ZERO_USERS = "You must insert one\nor more users";
 
   const char* IMG_EXTENSION = ".png";
 
@@ -201,11 +204,13 @@
     int64_t _username_in_use;
     int64_t _password_in_use;
 
+    bool one_or_more_user;
+
     void button_back(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void about_me(wxCommandEvent& event);
     //search first avaible file in current folder
-    uint64_t check_non_exists_file(std::string name, std::string extension);
+    uint64_t check_non_exists_file(const std::string& name, const std::string& extension);
 
     /**
      * @author Peruffo Riccardo

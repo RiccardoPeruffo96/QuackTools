@@ -1,72 +1,25 @@
-#include "base64.hpp"
+/**
+ * @author Peruffo Riccardo, RP96, riccardoperuffo96@gmail.com, github.com/RiccardoPeruffo96
+ * @date 2022
+ * @file sha256_sample.cpp
+ */
+
+#include "sha256.hpp"
 
 int main()
 {
-  //static uint8_t* base64_encode(uint8_t* input_string, int64_t length_string, int64_t mode = 0b1);
-	//static uint8_t* base64_decode(uint8_t* input_string, int64_t length_string, int64_t mode = 0b1);
-	//static int64_t base64_enc_size(int64_t length_string) { if (length_string == 0) { return 0; } return (((length_string + 2) / 3) * 4); }
-	//static int64_t base64_dec_size(uint8_t* input_string, int64_t length_string);
+  //I create an array with something that i want to calc
+  std::string input("Sample 4 using sha256 with QuackTools!");
+  //with this reference i have a pointer to work with
+  char*& inp_char = input.c_str();
 
-  uint8_t* data_to_hide = nullptr;
-  std::string scrt = "SECRET\t:)\n"; //data to hide and seek
-  data_to_hide = new uint8_t[scrt.length()];
-  //copy scrt to data_to_hide
-  uint64_t i = -1;
-  for(char letter : scrt)
-  {
-    data_to_hide[++i] = static_cast<uint8_t>(letter);
-  }
+  //call the object
+  _sha256_rp96_::sha256 hash = _sha256_rp96_::sha256(inp_char, input.length());
+  //calc hash
+  hash.compute_hash();
 
-  //image's name
-  std::string img_name = "trust_me.jpg";
+  //show output
+  std::cout << "The sha256 of the follow string:\n" << input << "\nis:\n" << hash.get_SHA256_string() << "\n";
 
-  //static void hide_file(
-    //uint8_t* bytes_data_file,
-    //int64_t bytes_data_length,
-    //std::string img_name_input
-  //);
-  _steganography_rp96_::steganography.hide_file(
-    data_to_hide,
-    scrt.length(),
-    img_name
-  ); //update the img with the input_file
-
-  //static uint8_t* seek_file(
-    //std::string img_name_input,
-    //int64_t& bytes_data_length
-  //);
-  int64_t length_data_to_seek = 0;
-  uint8_t* data_to_seek = _steganography_rp96_::seek_file(
-    img_name,
-    length_data_to_seek
-  );
-
-  //final check if data_to_seek == data_to_hide
-  if(length_data_to_seek != scrt.length())
-  {
-    std::cout << "Something wrong: length\n";
-    delete[] data_to_hide;
-    data_to_hide = nullptr;
-    delete[] data_to_seek;
-    data_to_seek = nullptr;
-    return 0;
-  }
-  for(auto i = 0; i < length_data_to_seek; ++i)
-  {
-    if(data_to_seek[i] != data_to_hide[i])
-    {
-      std::cout << "Something wrong: data\n";
-      delete[] data_to_hide;
-      data_to_hide = nullptr;
-      delete[] data_to_seek;
-      data_to_seek = nullptr;
-      return 0;
-    }
-  }
-  std::cout << "All went well :)\n";
-  delete[] data_to_hide;
-  data_to_hide = nullptr;
-  delete[] data_to_seek;
-  data_to_seek = nullptr;
   return 0;
 }

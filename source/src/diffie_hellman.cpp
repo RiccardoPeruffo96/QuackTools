@@ -10,6 +10,68 @@
 
 using namespace _diffie_hellman_rp96_;
 
+/**
+ * @brief gives empty values to the private vars:
+ * std::string privkey_str, std::string pubkey_str and std::string sharedkey_str
+ */
+diffie_hellman::diffie_hellman() noexcept(true):
+  privkey_str{ std::string("") },
+  pubkey_str{ std::string("") },
+  sharedkey_str{ std::string("") }
+{}
+
+diffie_hellman::diffie_hellman(std::string privkey_stored_str, std::string pubkey_received_str) noexcept(true):
+  sharedkey_str{ std::string("") }
+{
+  this->privkey_str = std::move(privkey_stored_str);
+  this->pubkey_str = std::move(pubkey_received_str);
+}
+
+diffie_hellman::diffie_hellman(const diffie_hellman& b64) noexcept(true):
+  privkey_str{ b64.privkey_str },
+  pubkey_str{ b64.pubkey_str },
+  sharedkey_str{ b64.sharedkey_str }
+{}
+
+diffie_hellman& diffie_hellman::operator=(const diffie_hellman& b64) noexcept(true)
+{
+  //copy assignment operator is different between copy constructors because first i need to clear the actual data
+  //phase 1: clean + assign
+  this->privkey_str = b64.privkey_str;
+  this->pubkey_str = b64.privkey_str;
+  this->sharedkey_str = b64.privkey_str;
+  return *this;
+}
+
+diffie_hellman::diffie_hellman(diffie_hellman&& b64) noexcept(true)
+{
+  //phase 1: swap strings
+  std::swap(this->privkey_str, b64.privkey_str);
+  std::swap(this->pubkey_str, b64.pubkey_str);
+  std::swap(this->sharedkey_str, b64.sharedkey_str);
+  //phase 2: clean source
+  b64.privkey_str.clear();
+  b64.pubkey_str.clear();
+  b64.sharedkey_str.clear();
+}
+
+diffie_hellman& diffie_hellman::operator=(diffie_hellman&& b64) noexcept(true)
+{
+  if (this != &b64)
+  {
+    return *this;
+  }
+  //phase 1: swap strings
+  std::swap(this->privkey_str, b64.privkey_str);
+  std::swap(this->pubkey_str, b64.pubkey_str);
+  std::swap(this->sharedkey_str, b64.sharedkey_str);
+  //phase 2: clean source
+  b64.privkey_str.clear();
+  b64.pubkey_str.clear();
+  b64.sharedkey_str.clear();
+  return *this;
+}
+
 uint32_t diffie_hellman::calc_exp_mod(uint32_t Y, uint32_t X, std::string auxiliary)
 {
   if (X == 0)
