@@ -38,9 +38,7 @@ add_subdirectory(source)
 add_subdirectory(tests)
 
 #enable run command
-add_custom_target(run
-  COMMAND
-    ./../bin/QuackTools)
+add_custom_target(run COMMAND cd ../ && ./bin/QuackTools)
 
 #enable doc command
 add_custom_target(doc
@@ -56,7 +54,7 @@ add_custom_target(docopen
   COMMAND
     doxygen ./Doxyfile
   COMMAND
-   xdg-open doc/html/index.html
+    xdg-open doc/html/index.html
   WORKING_DIRECTORY
     ${CMAKE_SOURCE_DIR}
   COMMENT
@@ -84,12 +82,13 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("DEBUG mode")
 
   #enable valgrind command
-  add_custom_target(valgrind COMMAND valgrind ./../bin/QuackTools)
-  #enable gdb
-  add_custom_target(gdb COMMAND gdb ./../bin/QuackTools)
+  add_custom_target(valgrind COMMAND cd ../ && valgrind ./bin/QuackTools)
 
   #if compiler is gcc
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+
+    #enable gdb / lldb
+    add_custom_target(debug COMMAND cd ../ && gdb ./bin/QuackTools)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
@@ -101,6 +100,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-omit-frame-pointer")
 
   elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+
+    #enable gdb / lldb
+    add_custom_target(debug COMMAND cd ../ && lldb ./bin/QuackTools)
 
     set(LLVM_USE_SANITIZER "Address;Memory;Undefined;Thread")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -g")

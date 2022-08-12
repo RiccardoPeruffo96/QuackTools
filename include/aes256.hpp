@@ -2,49 +2,7 @@
  * @author Peruffo Riccardo, RP96, riccardoperuffo96@gmail.com, github.com/RiccardoPeruffo96
  * @date 2022
  * @file aes256.hpp
- * @brief It allows to calculate aes256 ctr standard function, how declared at https://csrc.nist.gov/publications/detail/fips/197/final<br>
- * #####################################################################
- * <p>remember: to create a faster algorithm it modify the input and don't use new command, but only if input.lenght % 128 bits (16 chars) == 0<br>
- * in other cases we need to add padding to last block and to minimize the consume of memory and do useless operations,<br>
- * the function alloc and copy only last bytes,<br>
- * i report an example:</p>
- * <ul>
- * <li>you work with a file with size 1.234.567.890 bytes (~1.2GB); <em>//get_final_block</em>
- * </li><li>we easily calculate 1.234.567.890 % 16 = 2
- * <em>('%' means "modulo operation" for who don't know c-like language)</em>;
- * </li><li>aes256 only work with 128bits' blocks, so when you call "encode()",
- * the new size will forced to be (1.234.567.890 + 16 - (1.234.567.890 % 16)),
- * because it's first number greater then 1.234.567.890 and divisible by 16;
- * </li><li>the first (1.234.567.890 - (1.234.567.890 % 16)) = 1.234.567.888
- * bytes will overwrite the original input data;
- * </li><li>the for other 2 bytes: let's assume that the first byte is AB and
- * the second CD, we will have such a populated array (using PKCS#7 padding)<br>
- *    AB CD 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E<br>
- *    that will be encrypted
- * </li></ul>
- * <strong>THIS MEANS IN YOUR CODE YOU CAN DO THIS:</strong><br>
- * uint8_t* input_file_data = my_personal_function_to_read_file("my_secret.zip");<br>
- * int64_t input_file_len = my_personal_function_to_get_size("my_secret.zip");<br>
- * std::string key = sha256.get_string("duffy duck"); <em>//"duffy duck" it's not a good password but a good example</em><br>
- * <em>//key == fca2b42874aa397d1ef6fa65a4a525592210ffabcfe69a18ba1f4299b23d69ae</em><br>
- * auto my_aes256 = aes256(input_file_data, input_file_len, key);<br>
- * my_aes256.encode();<br>
- * for(auto i = 0; i < my_aes256.get_length_payload(); ++i)<br>
- * {<br>
- * &nbsp;&nbsp;std::cout << my_aes256.get_payload()[i]; <em>//std::cout << input_file_data[i]; works well</em><br>
- * }<br>
- * if(my_aes256.get_final_block() != nullptr)<br>
- * {<br>
- * &nbsp;&nbsp;for(auto i = 0; i < my_aes256.get_final_block_size(); ++i)<br>
- * &nbsp;&nbsp;{<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;std::cout << my_aes256.get_final_block()[i];<br>
- * &nbsp;&nbsp;}<br>
- * }<br>
- * std::cout << "\n";<br>
- * delete[] input_file_data;<br>
- * input_file_data = nullptr;<br>
- * <em>//last 16 bytes are saved on stack ('cause are very small amount of data) so you don't need to use delete[]<br>
- * //"delete[] input_file_data;" it's enough to avoid memory leak</em><br>
+ * @brief It allows to calculate aes256 ctr standard function, how declared at https://csrc.nist.gov/publications/detail/fips/197/final
  * @version 0.0.1 alpha [exam]
  */
 
@@ -81,7 +39,8 @@ namespace _aes256_rp96_
   const int32_t SUBKEY_N1 = 1; ///< logic variable using to follow AES standard with key expansion
 
   /**
-   * @brief template to calculate gcd about a number
+   * @brief metafunction to calculate gcd
+   * about a any type of number
    * @param a 1st number
    * @param b 2nd number
    */
@@ -90,8 +49,8 @@ namespace _aes256_rp96_
 
   /**
    * @brief template to make matrix-operations in an array, in this case rotate left a single matrix row
-   * @param row what row i want to rotate left (0..num_rows)
-   * @param round how many positions i want to rotate, it allows to use negative number
+   * @tparam row what row i want to rotate left (0..num_rows)
+   * @tparam round how many positions i want to rotate, it allows to use negative number
    * @param pointer_arr array to "convert" in num_rows*num_cols matrix
    * @param num_rows number of rows
    * @param num_cols number of cols
@@ -101,8 +60,8 @@ namespace _aes256_rp96_
 
   /**
    * @brief template to make matrix-operations in an array, in this case rotate right a single matrix row
-   * @param row what row i want to rotate right (0..num_rows)
-   * @param round how many positions i want to rotate, it allows to use negative number
+   * @tparam row what row i want to rotate right (0..num_rows)
+   * @tparam round how many positions i want to rotate, it allows to use negative number
    * @param pointer_arr array to "convert" in num_rows*num_cols matrix
    * @param num_rows number of rows
    * @param num_cols number of cols
@@ -112,8 +71,8 @@ namespace _aes256_rp96_
 
   /**
    * @brief template to make matrix-operations in an array, in this case rotate up a single matrix column
-   * @param col what column i want to rotate up (0..num_cols)
-   * @param round how many positions i want to rotate, it allows to use negative number
+   * @tparam col what column i want to rotate up (0..num_cols)
+   * @tparam round how many positions i want to rotate, it allows to use negative number
    * @param pointer_arr array to "convert" in num_rows*num_cols matrix
    * @param num_rows number of rows
    * @param num_cols number of cols
@@ -123,8 +82,8 @@ namespace _aes256_rp96_
 
   /**
    * @brief template to make matrix-operations in an array, in this case rotate down a single matrix column
-   * @param col what column i want to rotate down (0..num_cols)
-   * @param round how many positions i want to rotate, it allows to use negative number
+   * @tparam col what column i want to rotate down (0..num_cols)
+   * @tparam round how many positions i want to rotate, it allows to use negative number
    * @param pointer_arr array to "convert" in num_rows*num_cols matrix
    * @param num_rows number of rows
    * @param num_cols number of cols
@@ -154,7 +113,9 @@ namespace _aes256_rp96_
    */
   union wrapper_128bits
   {
+    /// call it to work with 128 bits as an array of uint_8 of length 16
     std::array<uint8_t, DIM_ARRAY> array_form;
+    /// call it to work with 128 bits as a matrix of uint_8 of length 4 * 4
     std::array<std::array<uint8_t, DIM_MATRIX>, DIM_MATRIX> matrix_form;
   };
 
@@ -165,7 +126,9 @@ namespace _aes256_rp96_
    */
   union wrapper_2048bits
   {
+    /// call it to work with 128 bits as an array of uint_8 of length 256
     std::array<uint8_t, DIM_ARRAY * DIM_ARRAY> array_form;
+    /// call it to work with 2048 bits as a matrix of uint_8 of length 16 * 16
     std::array<std::array<uint8_t, DIM_ARRAY>, DIM_ARRAY> matrix_form;
   };
 

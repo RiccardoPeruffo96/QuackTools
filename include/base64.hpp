@@ -4,19 +4,7 @@
  * @file base64.hpp
  * @brief This file allows to encoding and decoding *chars
  * it allow to use 3 types of base64 standard: RFC4648 standard,
- * RFC4648 url and RFC3501 standard<br>
- * #####################################################################
- * <strong>sample to use this interface:</strong><br>
- * int64_t input_len = ...;<br>
- * char* input_data = new char[input_len];<br>
- * input_data[0..input_len] = ...;<br>
- * uint8_t* base64_mytext = _base64_rp96_::base64::base64_encode(input_data, input_len);<br>
- * for (int64_t i = 0, max = _base64_rp96_::base64::base64_enc_size(input_len); i < max; ++i)<br>
- * {<br>
- * &nbsp;&nbsp;std::cout << base64_mytext[i];<br>
- * }<br>
- * delete[] base64_mytext, base64_mytext = nullptr;<br>
- * delete[] input_data, input_data = nullptr;<br>
+ * RFC4648 url and RFC3501 standard
  * @version 0.0.1 alpha [exam]
  */
 
@@ -97,6 +85,7 @@ namespace _base64_rp96_
 
     /**
      * @brief from an hypothetical input length, return the exact size needed to stored the same input but after the decode
+     * @param input_string the string to convert
      * @param length_string length to convert
      * @return size needed to stored the same decoded input
      */

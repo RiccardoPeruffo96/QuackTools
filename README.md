@@ -22,22 +22,23 @@ This program follows c++17 standards.
 
  * Linux systems: open the bash and follow the nexts commands:
    1. ``git clone https://github.com/RiccardoPeruffo96/QuackTools.git``
-   2. ``mkdir build``
-   3. ``cd build``
-   4. ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release ..``
-   5. ``make install``
+   2. ``cd QuackTools``
+   3. ``mkdir build``
+   4. ``cd build``
+   5. ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release ..``
+   6. ``make install``
        * ``make test`` (optional)
        * ``make doc`` (optional)
-   6. ``make run``
+   7. ``make run``
 
 Note: You can choose to use ``CC=gcc CXX=g++`` instead ``CC=clang CXX=clang++``
 
 ## Different compile options
 
- * To enable debug: ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug ..`` or ``CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release  ..``
-   * after that the follow commands are enabled (you need to run ``make install``): ``make gdb`` and ``make valgrind``;
+ * To enable debug: ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Debug ..`` or ``CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Debug ..``
+   * after that the follow commands are enabled (you need to run ``make install``): ``make debug`` (you need to have gdb installed if CC=gcc CXX=g++ or lldb installed if CC=clang CXX=clang++) and ``make valgrind`` (you need to have valgrind installed);
  * To enable code coverage: ``CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=coverage ..``
-   * after that the follow commands are enabled (you need to run ``make install`` then ``make run``): ``make cov`` to generate the code coverage at ``/codecoverage/coverage.html`` (you need to have gcov and gcovr)
+   * after that the follow commands are enabled (you need to run ``make install`` then ``make run``): ``make cov`` to generate the code coverage at ``/codecoverage/coverage.html`` (you need to have gcov and gcovr installed)
 
 ## Third party libreries
 

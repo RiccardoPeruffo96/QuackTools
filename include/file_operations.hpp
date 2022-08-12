@@ -55,7 +55,7 @@ namespace _file_operations_rp96_
   public:
     uint8_t* _file_data; ///< pointer to data
     int64_t _size_file; ///< size data
-    bool _struct_will_delete_pointer; ///<flag to understand how takes care about the pointer
+    bool _struct_will_delete_pointer; ///< flag to understand who is taking care of the pointer
 
     /**
      * @brief set private flags to false and other vars
@@ -224,17 +224,19 @@ namespace _file_operations_rp96_
     ~file_operations() noexcept(true);
 
     /**
-     * @brief overwrite the file with input's uint8_t* or append it at the end
-     * @param _file_name file's name in the program's directory
-     * @param datas the data to save, if equals to nullptr then will be used this->_data_file
-     * @param datas_size size of data, if equals to 0 then will be used this->_size_file
+     * @brief this function create a new file and write it datas from differents pointers.
+     * "files" param contains pointers that will be readed using FIFO order.
+     * @param output_file_name name of new file to create
+     * @param files list to couples of pointers and datas to store, at the end files will be empty
      * @param mode flags in OR like (std::trunc | std::out)
      */
     static int32_t save_third_file(std::string& output_file_name, std::list<file_pointer>& files, int32_t mode = 0);
 
     /**
-     * @brief overwrite this file with input's uint8_t* or append it at the end and recalculate mmap
-     * @param files list to couples of pointers and datas
+     * @brief overwrite this file with input's uint8_t* or append it at the end and recalculate mmap.
+     * mmap recalculation can be skipped.
+     * @param files list to couples of pointers and datas, at the end files will be empty
+     * @param i_want_reload_file if true at the end mmap will be recalculate
      * @param mode flags in OR like (std::trunc | std::out): if (std::trunc | std::app) then the first pointer will use std::trunc, others std::app. there isnt't std::trunc only std::app mode
      * @param _is_read_only default value is false, if true I force to use read-only memory access
      */

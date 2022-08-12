@@ -14,6 +14,7 @@
 #include <opencv2/opencv.hpp> //cv::imread
 #include <filesystem> //std::filesystem::path
 
+#include <fstream> //std::string
 /**
  * @brief this namespace define
  * statics methods to hide and seek
@@ -62,27 +63,30 @@ namespace _steganography_rp96_
     ///delete destructor
     ~steganography() = delete;
 
-   /**
-     * @brief hide the data in the img at the string path
+    /**
+     * @brief hide the data in the img at the string path.
+     * Please note the output will be only with .png extension.
      * @param bytes_data_file data
      * @param bytes_data_length data's size
-     * @param img_name_input file's image name
-     * @param img_name_output file's image new name
+     * @param img_name_input file name of input's image
+     * @param file_name_input file name of input's file to hide
+     * @param img_name_output file name of output's image to create, if empty will be the same of img_name_input
      */
     static void hide_file(uint8_t* bytes_data_file, int64_t bytes_data_length, const std::string& img_name_input, const std::string& file_name_input, std::string img_name_output = "");
 
-   /**
-     * @brief seek the data in the img at the string path, then return a char*. AAA: THE POINTER WILL NOT BE DELETE AUTOMATICALLY WHEN DECOSTRUCTOR OR OTHERS, WHO CALLS THE FUNCTION NEED TO KNOW HOW TO DO WITH THIS
-     * @param img_name_input file's image name
+    /**
+     * @brief seek the data in the img at the string path, then return a char*.
+     * AAA: THE POINTER WILL NOT BE DELETE AUTOMATICALLY WHEN DECOSTRUCTOR OR OTHERS, WHO CALLS THE FUNCTION NEED TO KNOW HOW TO DO WITH THIS
+     * @param img_name_input file name of input's image
      * @param bytes_data_length this param will be cleared and will contains the size of the return pointer
-     * @param img_name_output file's image new name
+     * @param file_name_output2 file name of output's file to seek and to create, the extension will be taken from original file
      * @return pointer to datas
      */
-    static uint8_t* seek_file(const std::string& img_name_input, int64_t& bytes_data_length, std::string& file_name_output);
+    static uint8_t* seek_file(const std::string& img_name_input, int64_t& bytes_data_length, std::string& file_name_output2);
 
   private:
 
-   /**
+    /**
      * @brief read the single color about one pixel and store it a bit of data
      * @param pixel_color color to change: blue, green, red are 0,1,2
      * @param data data
@@ -92,11 +96,11 @@ namespace _steganography_rp96_
     static void consume_single_color(uint8_t& pixel_color, uint8_t* data, uint32_t& index_data, uint32_t& position_actual);
 
     /**
-      * @brief read the lsb for each color and store it in file_data and set bits counter
-      * @param color matrix for blue, green and red values
-      * @param file_data when to store the lsb
-      * @param bits_already_read bits counter
-      */
+     * @brief read the lsb for each color and store it in file_data and set bits counter
+     * @param color matrix for blue, green and red values
+     * @param file_data when to store the lsb
+     * @param bits_already_read bits counter
+     */
     static void store_single_color(cv::Vec3b& color, uint8_t* file_data, uint64_t& bits_already_read);
 
     /**
@@ -104,9 +108,17 @@ namespace _steganography_rp96_
      * @param color matrix for blue, green and red values
      * @param file_data when to store the lsb
      * @param bits_already_read bits counter
-     * @param total_bits_length max bits readable, always total_bits_length % 8 == 0
      */
-    static void store_last_color(cv::Vec3b& color, uint8_t* file_data, uint64_t& bits_already_read, uint64_t& total_bits_length);
+    static void store_last_color(cv::Vec3b& color, uint8_t* file_data, uint64_t& bits_already_read);
+
+    /**
+     * @brief call consume_single_color 3 times for every channel for single pixel
+     * @param color matrix for blue, green and red values
+     * @param data input to elaborate
+     * @param index_data what element of data i'm reading
+     * @param position_actual what bit i'm reading about data[index_data]
+     */
+    static void consume_entire_pixel(cv::Vec3b& color, uint8_t* data, uint32_t& index_data, uint32_t& position_actual);
   };
 }
 

@@ -1,7 +1,7 @@
 /**
  * @author Peruffo Riccardo, RP96, riccardoperuffo96@gmail.com, github.com/RiccardoPeruffo96
  * @date 2022
- * @file file_operations.hpp
+ * @file gui.hpp
  * @brief Simple gui implementation
  * using wxWidgets
  * @version 0.0.1 alpha [exam]
@@ -38,49 +38,79 @@
       #include "../../data/media/duck.xpm"
   #endif
 
+  ///rgb value for used green
   #define GREEN_BACKGROUND wxColor(0x30, 0xBA, 0x30)
+  ///rgb value for used black
   #define BLACK_BACKGROUND wxColor(0x10, 0x14, 0x10)
+  ///rgb value for text
   #define TEXT_COLOR_ON_BLACK_BACKGROUND wxColor(0xAA, 0xAF, 0xAA)
 
+  ///auxiliary size var
   const uint64_t SIZE_IN_LBL_WDT = 150;
+  ///auxiliary size var
   const uint64_t SIZE_IN_LBL_HGT = 25;
+  ///auxiliary size var
   const uint64_t SIZE_BTN_HGT = 25;
-
+  ///auxiliary frames var
   const uint64_t NUM_PANELS = 7;
+  ///auxiliary frames var
   const uint64_t NUM_FULL_PANELS = 3;
 
+  ///min password length
   const uint64_t PWD_MIN_L = 8;
+  ///max password length
   const uint64_t PWD_MAX_L = 100;
+  ///auxiliary var (work in progress)
   const uint64_t NUMBER_FILE_RECOVERY = 5;
 
+  ///auxiliary var to convert string into hex value
   const uint32_t BITS256 = 256/4;
 
+  ///auxiliary error string
   const char* ERROR_FILE_NOT_OPEN = "ERROR: you cannot open this file for some reason (example: has the file been deleted or is it in use by other processes?)";
+  ///auxiliary error string
   const char* WARNING_IMG_NEEDED = "You need to select an image to run this function";
+  ///auxiliary error string
   const char* WARNING_FILE_NEEDED = "You need to select a file to run this function";
+  ///auxiliary error string
   const char* WARNING_NAME_NEEDED = "The file to save need a new name";
+  ///auxiliary error string
   const char* ERROR_FILE_NOT_SAVED = "I can't save the new file";
-  const char* SUCCESS_FILE_SAVED = "Operation complete";
-  const char*& SUCCESS_OPERATION = SUCCESS_FILE_SAVED;
-
+  ///auxiliary error string
   const char* SUBFOLDER_NOT_EXISTS = "The subfolder for this user\ndoesn't exists in /users\nBut it should.";
+  ///auxiliary error string
   const char* FATAL_ERROR = "Fatal error";
-
+  ///auxiliary error string
   const char* WARN_LABEL = "Warning";
-  const char* SUCC_LABEL = "Success";
-  const char* USER_FIELD = "user";
+  ///auxiliary error string
   const char* ERROR_WARN = "User or password\nnot correct";
+  ///auxiliary error string
   const char* UNCORRECT_PASSWORD = "Uncorrect password";
+  ///auxiliary error string
   const char* USER_NOT_UNIQUE = "The chosen username\nhas already been taken";
+  ///auxiliary error string
   const char* USER_EMPTY = "User cannot be empty";
+  ///auxiliary error string
   const char* ALREADY_HOMEPAGE = "You are already on homepage";
-
+  ///auxiliary error string
   const char* ZERO_USERS = "You must insert one\nor more users";
 
+  ///auxiliary success string
+  const char* SUCCESS_FILE_SAVED = "Operation complete";
+  ///auxiliary success string
+  const char*& SUCCESS_OPERATION = SUCCESS_FILE_SAVED;
+  ///auxiliary success string
+  const char* SUCC_LABEL = "Success";
+
+  ///auxiliary string
+  const char* USER_FIELD = "user";
+  ///auxiliary string
   const char* IMG_EXTENSION = ".png";
 
+  ///integer to indicate an object-id for each graphic content
   enum wxWindow_ids
   {
+    //every >= 0 number goes well to start
     wlcm_idpanel = 100, //id welcome panel
     wlcm_txtctrl_user,
     wlcm_txtctrl_pwd,
@@ -172,15 +202,38 @@
     //ID BUTTONS END
   };
 
+  /**
+   * @brief it's a basic usage of
+   * wxWidgets library that follow
+   * this pattern to initialize the
+   * GUI interface.
+   * It's not optional.
+   */
   class MyApp : public wxApp
   {
   public:
+    /**
+     * @brief this class if full
+     * write from wxWidgets and
+     * contains main()
+     */
       virtual bool OnInit();
   };
 
-  class MyFrame : public wxFrame
+  /**
+   * @brief this class contains a declaration
+   * of every elements using with GUI like buttons or strings
+   * and public elements that you can use in multiple times
+   * in differents frames
+   */
+  class MyFrame final : public wxFrame
   {
   public:
+    /**
+     * @brief memory initializing about my own frames
+     * this function is not optional and follows the
+     * wxWidgets pattern
+     */
     MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
   private:
@@ -261,7 +314,7 @@
     wxDECLARE_EVENT_TABLE();
   };
 
-  //start macro table
+  ///start macro table, this is necessary about wxWidgets paradigm and combine graphic elements with functions
   wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(id_button_back, MyFrame::button_back)
     EVT_MENU(wxID_EXIT, MyFrame::OnExit)

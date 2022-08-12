@@ -12,50 +12,79 @@ using namespace _steganography_rp96_;
 
 void steganography::hide_file(uint8_t* bytes_data_file, int64_t bytes_data_length, const std::string& img_name_input, const std::string& file_name_input, std::string img_name_output)
 {
+	//#######################################
+	//HIDE FILE:
+	//1. save the entire name of the file and divide name - extension
+	//2. check if I can save the name ("only" last 255 letters)
+	//   choose last letters 'cause have extension
+	//3. store the name length
+	//4. open the image
+	//   check if i have problems
+	//5. check how space I need
+	//6. check the img is too tiny
+	//#######################################
+
+  //1. save the entire name of the file and divide name - extension:
+	//with std::filesystem::path I have yet everything
 	std::filesystem::path filepath{file_name_input};
 	std::string filename = filepath.filename();
+
+	//2. check if I can save the name ("only" last 255 letters)
+	//check if I can save the name ("only" last 255 letters)
 	if(filename.length() > 0xFF)
 	{
 		//filename will contains last 255 name's letters
 		filename = filename.substr(filename.length() - 0xFF);
 	}
+
+	//3. store the name length
+  //after that i use 1 byte to store the filename length
 	filename += static_cast<char>(filename.length());
 
-	cv::Mat img = cv::imread(img_name_input, cv::IMREAD_COLOR); //open the img
+  //4. open the image
+	//i use OpenCV to doing this
+	cv::Mat img = cv::imread(img_name_input, cv::IMREAD_COLOR);
 
+  //check if i have problems
 	if(img.empty())
 	{
 		std::cout << "something wrong with imread\n";
 		return;
 	}
 
-	if((img.rows * img.cols) <= 64)
-	{
-		std::cout << "file too tiny\n";
-		return;
-	}
+  //5. check how space I need inside the img:
+	//> size of file to hide in bytes;
+	//> there is the filename, where every letter is a char(=byte)
+	//  note: the last filename's char is not a letter
+	//  but the value filename.length()
+	int64_t payload_to_hide = bytes_data_length + filename.length();
+	//> miss 64bits, contains size of payload (data + name);
+	int64_t size_to_hide = sizeof(int64_t) + payload_to_hide;
 
-	//first 64 bits are the size of bytes_data_file
-	//then the *uint8_t
-	int64_t total_data_size = bytes_data_length + filename.length();
-	int64_t size_to_hide = sizeof(int64_t) + total_data_size;
-
-	//uint8_t* data_to_hide = new uint8_t[size_to_hide];
-	std::array<uint8_t, sizeof(int64_t)> data_to_hide;
+	//this little array will be contains only the bits about payload_to_hide
+	//bits_of_payload[0] = 7th most relevant size_to_hide byte
+	//bits_of_payload[7] = 7th less relevant size_to_hide byte
+	std::array<uint8_t, sizeof(int64_t)> bits_of_payload;
 
 	//store the size of bytes_data_file
-	//data_to_hide[0] = 7th most relevant size_to_hide bits
-	//data_to_hide[7] = 7th less relevant size_to_hide bits
+	//every turns safe 8 bits from payload_to_hide
 	//#pragma unroll(sizeof(int64_t))
 	for(uint64_t i = 0; i < sizeof(int64_t); ++i)
 	{
-		data_to_hide[i] = static_cast<uint8_t>(static_cast<uint64_t>(total_data_size) >> ( ( (sizeof(uint64_t)-1) - i ) * BITS_IN_ONE_BYTE));
+		//take all 64 bit "static_cast<uint64_t>(payload_to_hide)"
+		//shift to right 7 times, 8 bits for each times
+		//then with "static_cast<uint8_t>" i take only first byte
+		//about this 64 bits
+		bits_of_payload[i] = static_cast<uint8_t>(static_cast<uint64_t>(payload_to_hide)
+		                     >> ( ( (sizeof(uint64_t)-1) - i ) * BITS_IN_ONE_BYTE));
 	}
-	//i have already a *uint8_t for datas (bytes_data_file)
 
+  //now final check:
+	//calc how many bits can use and ow many bits I need
 	int64_t img_space_usable = img.rows * img.cols * CHANNELS_BY_COLOR;
 	int64_t img_space_needed = size_to_hide * BITS_IN_ONE_BYTE;
 
+	//at the end if needed is higher than usable i cannot do nothing
 	if (img_space_needed > img_space_usable)
 	{
 		std::cout << "the img it's too little for the input\n";
@@ -63,52 +92,69 @@ void steganography::hide_file(uint8_t* bytes_data_file, int64_t bytes_data_lengt
 	}
 
 	//start to hide bits
+	//this var help to calc how many bits I need to read
+	//about a single var.
+	//EXAMPLE: POSITION_START = 0d2 -> 0b01101100
+	//----------------------------------------^
+	//i need to read the third bit, count start from zero.
 	uint32_t position_actual = POSITION_START;
+	//this var count the position about the byte to read
 	uint32_t index_data = 0;
+	//counter about first 63 bits
 	uint32_t counter_index = 0;
 
+  //aux var to work with matrix coordinates about image
 	uint64_t state_rows = 0, state_cols = 0;
 	//img_space_usable > 64 bits always
 	//this take every data of length file
-	for (decltype(img.rows) rows = 0; rows < img.rows; ++rows)
+	//first double for loop add first 64 bits about length payload
+
+	//Please note: in almost all cases the input img has more than 63 column
+	//so this little optimization is necessary
+	if(static_cast<uint64_t>(img.cols) < (63/3))
 	{
-		for (decltype(img.cols) cols = 0; cols < img.cols; ++cols)
+		for(; counter_index < 63; ++state_rows)
 		{
-			cv::Vec3b& color = img.at<cv::Vec3b>(cv::Point(cols, rows));
-
-			//check if I've finish with data_to_hide that only contains 'size_to_hide bytes'
-			if(counter_index == 63)
+			for(; counter_index < 63 && state_cols < static_cast<uint64_t>(img.cols); ++state_cols, counter_index += 3)
 			{
-				consume_single_color(color[INDEX_BLUE], data_to_hide.data(), index_data, position_actual);
-				index_data = 0;
-				consume_single_color(color[INDEX_GREEN], bytes_data_file, index_data, position_actual);
-				consume_single_color(color[INDEX_RED], bytes_data_file, index_data, position_actual);
-
-				if(cols == img.cols - 1)
-				{
-					state_cols = 0;
-					state_rows = rows + 1;
-				}
-				else
-				{
-					state_cols = cols + 1;
-					state_rows = rows;
-				}
-				cols = img.cols;
-				rows = img.rows;
-			}
-			else
-			{
-				//I always turn x3 times 'cause every pixel has 3 color
-				consume_single_color(color[INDEX_BLUE], data_to_hide.data(), index_data, position_actual);
-				++counter_index;
-				consume_single_color(color[INDEX_GREEN], data_to_hide.data(), index_data, position_actual);
-				++counter_index;
-				consume_single_color(color[INDEX_RED], data_to_hide.data(), index_data, position_actual);
-				++counter_index;
+				cv::Vec3b& color = img.at<cv::Vec3b>(cv::Point(state_cols, state_rows));
+        consume_entire_pixel(color, reinterpret_cast<uint8_t*>(bits_of_payload.data()), index_data, position_actual);
 			}
 		}
 	}
+	else
+	{
+		for(; counter_index < 63; ++state_cols, counter_index += 3)
+		{
+			cv::Vec3b& color = img.at<cv::Vec3b>(cv::Point(state_cols, 0));
+			consume_entire_pixel(color, reinterpret_cast<uint8_t*>(bits_of_payload.data()), index_data, position_actual);
+		}
+	}
+
+  //the last 64-time i need to consume last bit and about bits_of_payload
+	//then consume first 2 bit about payload.
+	//payload minimum have 1 byte so i'm sure about this 2 "consume_single_color"
+  cv::Vec3b& color_towards_payload = img.at<cv::Vec3b>(cv::Point(state_cols, state_rows));
+	//check if I've finish with bits_of_payload that only contains 'size_to_hide bytes'
+	//only last bit is from bits_of_payload
+	consume_single_color(color_towards_payload[INDEX_BLUE], bits_of_payload.data(), index_data, position_actual);
+	index_data = 0;
+	//others but if from file to hide
+	consume_single_color(color_towards_payload[INDEX_GREEN], bytes_data_file, index_data, position_actual);
+	consume_single_color(color_towards_payload[INDEX_RED], bytes_data_file, index_data, position_actual);
+
+	//update actual col and row
+	if(state_cols == static_cast<uint64_t>(img.cols) - 1)
+	{
+		state_cols = 0;
+		++state_rows;
+	}
+	else
+	{
+		++state_cols;
+	}
+
+  //TODO CONTINUARE QUI E TOGLIERE IL MERGE SUGLI ARRAY
 
 	//merge input 'n' name file in a single array
 	int64_t data_to_hide_extra_size = bytes_data_length + filename.length();
@@ -183,16 +229,15 @@ void steganography::hide_file(uint8_t* bytes_data_file, int64_t bytes_data_lengt
 				//consume_single_color(color[INDEX_BLUE], bytes_data_file, index_data, position_actual);
 				//consume_single_color(color[INDEX_GREEN], bytes_data_file, index_data, position_actual);
 				//consume_single_color(color[INDEX_RED], bytes_data_file, index_data, position_actual);
-				consume_single_color(color[INDEX_BLUE], data_to_hide_extra_info, index_data, position_actual);
-				consume_single_color(color[INDEX_GREEN], data_to_hide_extra_info, index_data, position_actual);
-				consume_single_color(color[INDEX_RED], data_to_hide_extra_info, index_data, position_actual);
+				consume_entire_pixel(color, data_to_hide_extra_info, index_data, position_actual);
+				//consume_single_color(color[INDEX_BLUE], data_to_hide_extra_info, index_data, position_actual);
+				//consume_single_color(color[INDEX_GREEN], data_to_hide_extra_info, index_data, position_actual);
+				//consume_single_color(color[INDEX_RED], data_to_hide_extra_info, index_data, position_actual);
 			}
 		}
 	}
 
-	delete[] data_to_hide_extra_info;
-	data_to_hide_extra_info = nullptr;
-
+  //search about file name is not unique
 	if(img_name_output.empty() == true)
 	{
 		std::filesystem::path file_output = img_name_input;
@@ -204,14 +249,22 @@ void steganography::hide_file(uint8_t* bytes_data_file, int64_t bytes_data_lengt
 
 	img_name_output += ".png";
 	imwrite(img_name_output, img);
+
+  //clear necessary at now
+	delete[] data_to_hide_extra_info;
+	data_to_hide_extra_info = nullptr;
+
 }
 
-uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& bytes_data_length, std::string& file_name_output)
+uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& bytes_data_length, std::string& file_name_output2)
 {
-	file_name_output.clear();
+	//01. clean the string
+	//with this i'm sure the string will be contains name of file
+	std::string file_name_output;
 
   cv::Mat img = cv::imread(img_name_input, cv::IMREAD_COLOR); //open the img
 
+  //02. check the img + tiny check
 	if(img.empty())
 	{
 		std::cout << "something wrong with imread\n";
@@ -225,6 +278,7 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 		return nullptr;
 	}
 
+  //03. i'm looking about the size file
 	bytes_data_length = 0;
 	uint64_t bits_already_read = 0;
 	uint64_t total_bits_length = 0;
@@ -234,6 +288,7 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 	uint64_t state_cols_bytes_reading = 0;
 	uint64_t state_rows_bytes_reading = 0;
 
+  //with the first 64 bits i have the size of payload
 	for (rows = 0; rows < img.rows; ++rows)
 	{
 		for (cols = 0; cols < img.cols; ++cols)
@@ -266,6 +321,8 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 			else
 			{
 				bytes_data_length |= (color[INDEX_BLUE] % 2); //finish
+				//then i use bits_already_read like tmp buffer
+				//so i need to store it in file_data
 				bits_already_read = (((color[INDEX_GREEN] % 2) << INDEX_GREEN) | (color[INDEX_RED] % 2));
 
 				if(cols == img.cols - 1)
@@ -286,11 +343,12 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 	}
 
 	uint8_t* file_data = nullptr;
+	//04. little checks about size found
 	if(bytes_data_length <= 0) //check length so I can call this->store_single_color() twice in worst case but never 0
 	{
 		std::cout << "error with seek: size of file stored is zero\n";
 		bytes_data_length = -1;
-		return  nullptr;
+		return nullptr;
 	}
 
 	if(static_cast<uint64_t>(img.rows * img.cols * 3) < ((bytes_data_length + sizeof(int64_t)) * 8)) //last check on correct dimensions
@@ -309,6 +367,7 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 	file_data = new uint8_t[bytes_data_length];
 	total_bits_length = bytes_data_length * 8; //this is always >= 8
 
+  //using the tmp buffer
 	file_data[0] = bits_already_read << (8 - 2);
 	bits_already_read = 2;
 
@@ -319,7 +378,7 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 
 		if((bits_already_read + 3) > total_bits_length) //if I risk read too much
 		{
-			store_last_color(color, file_data, bits_already_read, total_bits_length);
+			store_last_color(color, file_data, bits_already_read);
 			cols = img.cols;
 			//rows = img.rows;
 			have_i_finish = true;
@@ -336,11 +395,11 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 			for (cols = 0; cols < img.cols; ++cols)
 			{
 				//I have to read every single bits in img then store it in uint8_t*
-				cv::Vec3b& color = img.at<cv::Vec3b>(cv::Point(cols, state_rows_bytes_reading));
+				cv::Vec3b& color = img.at<cv::Vec3b>(cv::Point(cols, rows));
 
 				if((bits_already_read + 3) > total_bits_length) //if I risk read too much
 				{
-					store_last_color(color, file_data, bits_already_read, total_bits_length);
+					store_last_color(color, file_data, bits_already_read);
 					cols = img.cols;
 					rows = img.rows;
 					continue;
@@ -363,6 +422,7 @@ uint8_t* steganography::seek_file(const std::string& img_name_input, int64_t& by
 	}
 	//then reverse the string to obtain the correct name
 	std::reverse(file_name_output.begin(), file_name_output.end());
+	file_name_output2 = file_name_output;
 
 	//and update the correct bytes_data_length:
 	//file_data from 0..(bytes_data_length - file_name_output)
@@ -381,7 +441,7 @@ void steganography::consume_single_color(uint8_t& pixel_color, uint8_t* data, ui
 
 	if ((pixel_color % 2) != (single_bit % 2)) //compare last bit
 	{
-		(pixel_color % 2 == 0) ? ++pixel_color : --pixel_color; //change last bit
+		((pixel_color % 2 == 0) ? (++pixel_color) : (--pixel_color)); //change last bit
 	}
 	//this is a countdown,
 	//when it's 0 then I read next datas value
@@ -396,6 +456,7 @@ void steganography::consume_single_color(uint8_t& pixel_color, uint8_t* data, ui
 	}
 }
 
+//i read 3 bits
 void steganography::store_single_color(cv::Vec3b& color, uint8_t* file_data, uint64_t& bits_already_read)
 {
 	uint64_t index = bits_already_read / BITS_IN_ONE_BYTE;
@@ -420,9 +481,8 @@ void steganography::store_single_color(cv::Vec3b& color, uint8_t* file_data, uin
 	}
 }
 
-void steganography::store_last_color(cv::Vec3b& color, uint8_t* file_data, uint64_t& bits_already_read, uint64_t& total_bits_length)
+void steganography::store_last_color(cv::Vec3b& color, uint8_t* file_data, uint64_t& bits_already_read)
 {
-	std::cout << "total_bits_length: " << total_bits_length << "\n";
 	//I'm here because (bits_already_read + 3) > total_bits_length
 	//I know total_bits_length % 8 == 0 so
 	//   EOF 0 1 2 3 4 5 6 7 0 1 2 3 ...
@@ -444,4 +504,11 @@ void steganography::store_last_color(cv::Vec3b& color, uint8_t* file_data, uint6
 		default: //blue == file_data[(bits_already_read / 8) + 1]
 			break;
 	}
+}
+
+void steganography::consume_entire_pixel(cv::Vec3b& color, uint8_t* data, uint32_t& index_data, uint32_t& position_actual)
+{
+	consume_single_color(color[INDEX_BLUE], data, index_data, position_actual);
+	consume_single_color(color[INDEX_GREEN], data, index_data, position_actual);
+	consume_single_color(color[INDEX_RED], data, index_data, position_actual);
 }

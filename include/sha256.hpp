@@ -46,7 +46,8 @@ namespace _sha256_rp96_
   //legth message to have 1GB, 288 == sizeof(struct)
 
   /**
-   * @struct message it's a wrap who rapresent a single SHA256 block
+   * @struct message
+   * it's a wrap who rapresent a single SHA256 block
    * we know the input it's always padded, so (lenght data + padding) % 512 bits (or 16 bytes) == 0
    * we receive a char*, so the firsts 16 bytes are stored with a pointer
    * the seconds 48 bytes are stored with an uint32s' array
