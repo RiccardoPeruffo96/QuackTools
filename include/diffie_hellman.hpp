@@ -24,13 +24,16 @@
  */
 namespace _diffie_hellman_rp96_
 {
+  const uint32_t Q = 0xFFFFFFFB; ///< largest prime number with 32 bit
+  const uint32_t ALPHA = 0x2; ///< coprime integers with Q, so gcd(q, alpha) = 1
+  
   /**
    * @brief this class contains a declaration
    * of the method used to calculate
    * diffie_hellman protocol to create a secret
    * key only with an half key exchange
    */
-  class diffie_hellman
+  class diffie_hellman final
   {
   public:
     /**
@@ -103,9 +106,13 @@ namespace _diffie_hellman_rp96_
      */
     std::string get_public_string() { return this->pubkey_str; }
 
+    /**
+     * @brief create a random number smallest then Q
+     * @return a random number between [1..(this->q - 1)]
+     */
+    static uint32_t create_u32_rand_value();
+
   private:
-    const uint32_t Q = 0xFFFFFFFB; ///< largest prime number with 32 bit
-    const uint32_t ALPHA = 0x2; ///< coprime integers with Q, so gcd(q, alpha) = 1
     //const int32_t ZERO = 0; //< auxiliary constants vars
     const int32_t CYCLES_128BITS = 4; ///< loop necessary to generate a 128bit random number
     const int32_t CYCLES_256BITS = 8; ///< loop necessary to generate a 256bit random number
@@ -131,12 +138,6 @@ namespace _diffie_hellman_rp96_
      * @return number between [0..2^32-1] extracted starting from input[index * 8] and input[(index * 8) + 8]
      */
     uint32_t uint32bit_from_string(std::string input, uint32_t index);
-
-    /**
-     * @brief create a random number smallest then Q
-     * @return a random number between [1..(this->q - 1)]
-     */
-    uint32_t create_u32_rand_value();
 
     /**
      * @brief create strings privkey_str and pubkey_str with random value

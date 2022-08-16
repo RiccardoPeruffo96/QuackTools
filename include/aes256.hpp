@@ -147,7 +147,7 @@ namespace _aes256_rp96_
    * INTEL and AMD that support specific asm commands to calculate
    * aes256.
    */
-  class aes256
+  class aes256 final
   {
   public:
 

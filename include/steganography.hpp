@@ -46,7 +46,7 @@ namespace _steganography_rp96_
    * @brief this class is used only with statics methods
    * the class is used to hide privates functions
    */
-  class steganography
+  class steganography final
   {
   public:
 

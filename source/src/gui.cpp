@@ -1652,7 +1652,7 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
 {
   //I consider only the file like an input
   const uint64_t FLAGGED = 1;
-  const char* b64_warning = "invalid input to decode";
+  const char* b64_warning = "invalid input to encode or decode";
 
   wxRadioButton* do_i_have_enc = reinterpret_cast<wxRadioButton*>(FindWindowById(b64_radbtn_enc));
   wxCheckBox* cbox_fromfile = reinterpret_cast<wxCheckBox*>(FindWindowById(b64_cbox_fromfile));
@@ -1661,11 +1661,15 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
 
   txtctrl_output->Clear();
 
+  int64_t input_length = -1;
+  uint8_t* input_text = nullptr;
+
   //###################
   // ENCODE-DECODE FILE
   //###################
   if(cbox_fromfile->GetValue() == FLAGGED) //if input it's a file
   {
+    //obtains data from file
     _file_operations_rp96_::file_operations input_file = _file_operations_rp96_::file_operations(stcstr_b64.ToStdString(), true);
 
     if(input_file.get_data_file() == nullptr) //file not found
@@ -1675,9 +1679,92 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
       return;
     }
 
-    uint8_t* input_text = _base64_rp96_::base64::base64_encode(input_file.get_data_file(), input_file.get_size_file(), standard_used->GetSelection());
-    txtctrl_output->AppendText(input_text);
+    //first check if I want to work with each line differently or not
+    wxCheckBox* cbox_eachline = reinterpret_cast<wxCheckBox*>(FindWindowById(b64_cbox_eachline));
+    if(cbox_eachline->GetValue() == FLAGGED)
+    {
+      std::istringstream input_all_txt;
+      input_all_txt.str(reinterpret_cast<char*>(input_file.get_data_file()));
+      //for each line to input
+      for (std::string line; std::getline(input_all_txt, line); )
+      {
+        if(line.length() == 0)
+        {
+          continue;
+        }
 
+        std::string out_text("");
+        //i copy the line and static convert it uint8_t
+        int64_t buffer_len = static_cast<int64_t>(line.length());
+        uint8_t* buffer_txt = new uint8_t[buffer_len];
+        for(int64_t i = 0; i < buffer_len; ++i)
+        {
+          buffer_txt[i] = static_cast<uint8_t>(line.at(i));
+        }
+        if(do_i_have_enc->GetValue() == FLAGGED)
+        {
+          input_text = _base64_rp96_::base64::base64_encode(buffer_txt,
+          buffer_len, input_length, standard_used->GetSelection());
+        }
+        else
+        {
+          input_text = _base64_rp96_::base64::base64_decode(buffer_txt,
+          buffer_len, input_length);
+        }
+        //then if i have valid results, print them
+        if(input_text == nullptr)
+        {
+          out_text += std::string(b64_warning);
+        }
+        else
+        {
+          out_text = std::string(reinterpret_cast<char*>(input_text));
+          out_text.resize(input_length);
+        }
+        //update the gui
+        txtctrl_output->AppendText(out_text);
+        txtctrl_output->AppendText("\n");
+        //then clean the value
+        delete[] buffer_txt;
+        buffer_txt = nullptr;
+        delete[] input_text;
+        input_text = nullptr;
+      }
+    }
+    else
+    {
+      std::string out_text("");
+      //after that i want to understand if i need to encode or decode
+      if(do_i_have_enc->GetValue() == FLAGGED)
+      {
+        input_text = _base64_rp96_::base64::base64_encode(input_file.get_data_file(),
+        input_file.get_size_file(), input_length, standard_used->GetSelection());
+      }
+      else
+      {
+        input_text = _base64_rp96_::base64::base64_decode(input_file.get_data_file(),
+        input_file.get_size_file(), input_length);
+      }
+      //then if i have valid results, print them
+      if(input_text == nullptr)
+      {
+        out_text += std::string(b64_warning);
+      }
+      else
+      {
+        out_text = std::string(reinterpret_cast<char*>(input_text));
+        out_text.resize(input_length);
+      }
+      //update the gui
+      txtctrl_output->AppendText(out_text);
+      txtctrl_output->AppendText("\n");
+      //then clean the value
+      delete[] input_text;
+      input_text = nullptr;
+
+    }
+
+    //then clean the value and return
     delete[] input_text;
     input_text = nullptr;
 
@@ -1694,7 +1781,7 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
   // ENCODE-DECODE PLAINTEXT MULTILINE
   //###################
   //I change work tipe if eachline it's flagged
-  /*
+
   wxCheckBox* cbox_eachline = reinterpret_cast<wxCheckBox*>(FindWindowById(b64_cbox_eachline));
   if(cbox_eachline->GetValue() == FLAGGED)
   {
@@ -1703,51 +1790,51 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
     //for each line to input
     for (std::string line; std::getline(input_all_txt, line); )
     {
+      if(line.length() == 0)
+      {
+        continue;
+      }
+
+      std::string out_text("");
       //i copy the line and static convert it uint8_t
-      uint64_t buffer_len = static_cast<uint64_t>(line.length());
+      int64_t buffer_len = static_cast<int64_t>(line.length());
       uint8_t* buffer_txt = new uint8_t[buffer_len];
-      for(auto i = 0; i < buffer_len; ++i)
+      for(int64_t i = 0; i < buffer_len; ++i)
       {
         buffer_txt[i] = static_cast<uint8_t>(line.at(i));
       }
-
-      std::string out_text;
-      uint8_t* input_text = nullptr;
-      int64_t len_output = 0;
-
       if(do_i_have_enc->GetValue() == FLAGGED)
       {
-        input_text = _base64_rp96_::base64::base64_encode(buffer_txt, buffer_len);
-        len_output = _base64_rp96_::base64::base64_enc_size(buffer_len);
+        input_text = _base64_rp96_::base64::base64_encode(buffer_txt,
+        buffer_len, input_length, standard_used->GetSelection());
       }
       else
       {
-        input_text = _base64_rp96_::base64::base64_decode(buffer_txt, buffer_len);
-        len_output = _base64_rp96_::base64::base64_dec_size(buffer_txt, buffer_len);
+        input_text = _base64_rp96_::base64::base64_decode(buffer_txt,
+        buffer_len, input_length);
       }
-
+      //then if i have valid results, print them
       if(input_text == nullptr)
       {
-        out_text = std::string(b64_warning);
+        out_text += std::string(b64_warning);
       }
       else
       {
         out_text = std::string(reinterpret_cast<char*>(input_text));
-        out_text.resize(len_output);
+        out_text.resize(input_length);
       }
-
+      //update the gui
       txtctrl_output->AppendText(out_text);
       txtctrl_output->AppendText("\n");
-
-      delete[] input_text;
-      input_text = nullptr;
+      //then clean the value
       delete[] buffer_txt;
       buffer_txt = nullptr;
+      delete[] input_text;
+      input_text = nullptr;
     }
     event.Skip();
     return;
   }
-  */
 
   //###################
   // ENCODE-DECODE PLAINTEXT
@@ -1762,18 +1849,16 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
   }
 
   std::string out_text("");
-  uint8_t* input_text = nullptr;
-  int64_t len_output = 0;
+  input_text = nullptr;
+  int64_t len_output = -1;
 
   if(do_i_have_enc->GetValue() == FLAGGED)
   {
-    len_output = _base64_rp96_::base64::base64_enc_size(buffer_len);
-    input_text = _base64_rp96_::base64::base64_encode(buffer_txt, buffer_len, standard_used->GetSelection());
+    input_text = _base64_rp96_::base64::base64_encode(buffer_txt, buffer_len, len_output, standard_used->GetSelection());
   }
   else
   {
-    len_output = _base64_rp96_::base64::base64_dec_size(buffer_txt, buffer_len);
-    input_text = _base64_rp96_::base64::base64_decode(buffer_txt, buffer_len);
+    input_text = _base64_rp96_::base64::base64_decode(buffer_txt, buffer_len, len_output);
   }
 
   if(input_text == nullptr)

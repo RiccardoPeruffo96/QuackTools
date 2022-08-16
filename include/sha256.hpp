@@ -52,7 +52,7 @@ namespace _sha256_rp96_
    * we receive a char*, so the firsts 16 bytes are stored with a pointer
    * the seconds 48 bytes are stored with an uint32s' array
    */
-  struct message
+  struct message final
   {
   public:
 
@@ -174,7 +174,7 @@ namespace _sha256_rp96_
    * INTEL and AMD that support specific asm commands to calculate
    * sha256.
    */
-  class sha256 //sizeof(sha256) == 1160 -> 1149 Bytes + 11(padding) 'cause 40-Bytes alignment
+  class sha256 final //sizeof(sha256) == 1160 -> 1149 Bytes + 11(padding) 'cause 40-Bytes alignment
   {
   public:
 

@@ -10,13 +10,15 @@
 
 using namespace _base64_rp96_;
 
-uint8_t* base64::base64_encode(uint8_t* input_string, int64_t length_string, int64_t mode)
+uint8_t* base64::base64_encode(uint8_t* input_string, int64_t length_string, int64_t& output_lenght, int64_t mode)
 {
+	//check if length and pointer is valid
 	if (input_string == nullptr || length_string < 1)
 	{
 		return nullptr;
 	}
 
+  //choose the standard to work with
 	const char* const& translater__ = ((mode == RFC4648_STD) ?
 	  (TRANSLATER_RFC4648_STD) :
 		((mode == RFC4648_URL) ?
@@ -24,90 +26,131 @@ uint8_t* base64::base64_encode(uint8_t* input_string, int64_t length_string, int
 			(TRANSLATER_RFC3501_STD))
 	);
 
-	int64_t b64_length = _base64_rp96_::base64::base64_enc_size(length_string);
-	uint8_t* b64 = new uint8_t[b64_length];
-	int64_t counter = 0;
+	//obtain the size of output
+	output_lenght = _base64_rp96_::base64::base64_enc_size(length_string);
+	uint8_t* output = new uint8_t[output_lenght];
 
-	b64[0] = static_cast<uint8_t>(translater__[input_string[0] >> 2]);
-	b64[++counter] = ((input_string[0] & 0b00000011) << 4);
-
-	for (int64_t i = 1; i < length_string; ++i)
+  //from a string, i need to take every 3 letters (24 bits) and
+	//convert them into x4 letters: every new letter has only 6 bits
+	//then i have x4 letter with value 0..63 and an char* (TRANSLATER_RFC4648_STD)
+	//about exactly 64 letters.
+	//every x4 letter is an index and the final value is, for each letter,
+	//output[counter] = translater__[value];
+	int64_t counter = -1;
+	for (int64_t i = 0; i < length_string; ++i)
 	{
+		//i work always in the same value with every triplet of numbers:
+		//the logic start from default
 		switch (i % 3)
 		{
 		case 1:
-			b64[counter] = static_cast<uint8_t>(translater__[((input_string[i] & 0b11110000) >> 4) | b64[counter]]);
-			b64[++counter] = ((input_string[i] & 0b00001111) << 2);
+      //take the 2 bits that i know are stored and append the x4 most significant bits
+			//x4 less significant bits become x4 most significant bits for next value
+			output[counter] = static_cast<uint8_t>(translater__[((input_string[i] & 0b11110000) >> 4) | output[counter]]);
+			output[++counter] = ((input_string[i] & 0b00001111) << 2);
 			break;
 		case 2:
-			b64[counter] = static_cast<uint8_t>(translater__[((input_string[i] & 0b11000000) >> 6) | b64[counter]]);
-			b64[++counter] = static_cast<uint8_t>(translater__[input_string[i] & 0b00111111]);
+		  //take x2 missing bits and append to x4 most significant bits about case 1
+      //then i take last 6 bits and i finish
+			output[counter] = static_cast<uint8_t>(translater__[((input_string[i] & 0b11000000) >> 6) | output[counter]]);
+			output[++counter] = static_cast<uint8_t>(translater__[input_string[i] & 0b00111111]);
 			break;
 		default:
-			b64[++counter] = static_cast<uint8_t>(translater__[input_string[i] >> 2]);
-			b64[++counter] = ((input_string[i] & 0b00000011) << 4);
+		  //I start so first i must take x6 most significant bits and become a single value
+			//other is stored in another var like x2 most significant bits
+			output[++counter] = static_cast<uint8_t>(translater__[input_string[i] >> 2]);
+			output[++counter] = ((input_string[i] & 0b00000011) << 4);
 			break;
 		}
 	}
 
+  //now i need to understand if padding ('=' chars) is necessary
 	if (length_string % 3 != 0)
 	{
-		b64[counter] = static_cast<uint8_t>(translater__[static_cast<uint64_t>(b64[counter])]);
+		output[counter] = static_cast<uint8_t>(translater__[static_cast<uint64_t>(output[counter])]);
 		if(length_string % 3 == 1)
 		{
-			b64[++counter] = static_cast<uint8_t>('=');
+			output[++counter] = static_cast<uint8_t>('=');
 		}
-		b64[++counter] = static_cast<uint8_t>('=');
+		output[++counter] = static_cast<uint8_t>('=');
 	}
 
-	return b64;
+	return output;
 }
 
-uint8_t* base64::base64_decode(uint8_t* input_string, int64_t length_string)
+uint8_t* base64::base64_decode(uint8_t* input_string, int64_t length_string, int64_t& output_lenght)
 {
+	//i assume that the input follow RFC4648
+	//but it works also with RFC3501
+	//first of all check if input is valid
 	if (input_string == nullptr || length_string < 1)
 	{
 		return nullptr;
 	}
 
-	int64_t output_lenght = base64_dec_size(input_string, length_string);
+  //02. base64_dec_size return output_lenght correct value but
+	//if input don't follow the correct base64 rule
+	//(every value is an element of TRANSLATER_RFC4648_STD)
+	//return an invalid numeric value
+	//int64_t output_lenght = base64_dec_size(input_string, length_string);
+	output_lenght = base64_dec_size(input_string, length_string);
 	if (output_lenght < 1)
 	{
 		return nullptr;
 	}
 
+  //03. now i can create the output array
 	uint8_t* output = new uint8_t[output_lenght];
 
-	int64_t counter = -1;
-	int64_t i = -1;
+  //04. i read every time x4 input letter then convert into x3 original message
+	int64_t counter = -1; //counter about input_string's letters
+	int64_t i = -1; //index about output[i]
 	while(i < output_lenght - 3)
 	{
+		//store every single input letter
+		//conversion__ convert the letter into numerical value
+		//from TRANSLATER_RFC4648_STD to ascii table
+		//for each input_string value
+		//i after convert the value with conversion__
+		//then i have the ascii value and save it
 		int8_t var[4];
 		var[0] = conversion__(input_string[++counter]);
 		var[1] = conversion__(input_string[++counter]);
 		var[2] = conversion__(input_string[++counter]);
 		var[3] = conversion__(input_string[++counter]);
 
+    //if something is -1 some letter are not convertible
+		//this should never happen because base64_dec_size makes the check
 		if (var[0] < 0 || var[1] < 0 || var[2] < 0 || var[3] < 0)
 		{
-			/*std::cout << "0: " << (int) input_string[counter - 3] << " - " << (int) var[0] << "\n";
-			std::cout << "1: " << (int) input_string[counter - 2] << " - " << (int) var[1] << "\n";
-			std::cout << "2: " << (int) input_string[counter - 1] << " - " << (int) var[2] << "\n";
-			std::cout << "3: " << (int) input_string[counter - 0] << " - " << (int) var[3] << "\n";*/
 			delete[] output;
 			output = nullptr;
 			return nullptr;
 		}
 
-		output[++i] = static_cast<uint8_t>(((var[0] & 0b00111111) << 2) | ((var[1] & 0b00110000) >> 4));
-		output[++i] = static_cast<uint8_t>(((var[1] & 0b00001111) << 4) | ((var[2] & 0b00111100) >> 2));
-		output[++i] = static_cast<uint8_t>(((var[2] & 0b00000011) << 6) | (var[3] & 0b00111111));
+    //i have 4 number and only number use only 6 bits
+		//I need to transform they in 3 values:
+    //image to concat the 6x4 bits like
+		//first || second || third || fourth
+		//then divide the 24 bits into 3 byte
+		//output[0] || output[1] || output[2]
+		output[++i] = concat01(var[0], var[1]);
+		output[++i] = concat02(var[1], var[2]);
+		output[++i] = concat03(var[2], var[3]);
 	}
 
+  //check if now i'm already done
+  if(i == output_lenght - 1)
+	{
+		return output;
+	}
+
+  //now i make the same thing but i add more controls because I know that
+	//it's not guaranteed I have a 6x4 bits: maybe I have padding or something different
 	int8_t var[4];
 	var[0] = conversion__(input_string[++counter]);
 	var[1] = conversion__(input_string[++counter]);
-	if (var[0] < 0 || var[1] < 0)
+	if (var[0] < 0 || var[1] < 0) //this should never happen
 	{
 		delete[] output;
 		output = nullptr;
@@ -115,17 +158,20 @@ uint8_t* base64::base64_decode(uint8_t* input_string, int64_t length_string)
 	}
 	var[2] = conversion__(input_string[++counter]);
 	var[3] = conversion__(input_string[++counter]);
-	output[++i] = static_cast<uint8_t>(((var[0] & 0b00111111) << 2) | ((var[1] & 0b00110000) >> 4));
-	if (var[2] < 0)
+	output[++i] = concat01(var[0], var[1]);
+	//now everytime need to check 'i' var
+	if (i == output_lenght - 1 || var[2] < 0)
 	{
 		return output;
 	}
-	output[++i] = static_cast<uint8_t>(((var[1] & 0b00001111) << 4) | ((var[2] & 0b00111100) >> 2));
-	if (var[3] < 0)
+	//check 'i' var
+	output[++i] = concat02(var[1], var[2]);
+	if (i == output_lenght - 1 || var[3] < 0)
 	{
 		return output;
 	}
-	output[++i] = static_cast<uint8_t>(((var[2] & 0b00000011) << 6) | (var[3] & 0b00111111));
+  //now i are forced to be equals to output_lenght - 1
+	output[++i] = concat03(var[2], var[3]);
 	return output;
 }
 
@@ -208,4 +254,19 @@ constexpr char _base64_rp96_::conversion__(char input)
 		return -2;
 	}
 	return -1;
+}
+
+constexpr uint8_t _base64_rp96_::concat01(int8_t v01, int8_t v02)
+{
+	return static_cast<uint8_t>(((v01 & 0b00111111) << 2) | ((v02 & 0b00110000) >> 4));
+}
+
+constexpr uint8_t _base64_rp96_::concat02(int8_t v01, int8_t v02)
+{
+	return static_cast<uint8_t>(((v01 & 0b00001111) << 4) | ((v02 & 0b00111100) >> 2));
+}
+
+constexpr uint8_t _base64_rp96_::concat03(int8_t v01, int8_t v02)
+{
+	return static_cast<uint8_t>(((v01 & 0b00000011) << 6) | (v02 & 0b00111111));
 }

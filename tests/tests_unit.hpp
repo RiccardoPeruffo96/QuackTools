@@ -8,6 +8,7 @@
 #define TESTS_RP96_HPP_
 
 #include <iostream>
+#include <random>
 #include <vector>
 
 #ifndef CATCH_CONFIG_MAIN
@@ -27,7 +28,6 @@ namespace _tests_unit_rp96_
   bool tests_aes256();
   bool tests_base64();
   bool tests_diffie_hellman();
-  bool tests_steganography();
 } //_tests_unit_rp96_
 
 #endif //TESTS_RP96_HPP_

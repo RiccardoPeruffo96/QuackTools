@@ -85,11 +85,11 @@ uint32_t diffie_hellman::calc_exp_mod(uint32_t Y, uint32_t X, std::string auxili
     for (uint64_t i = 0; i < static_cast<uint64_t>(auxiliary.length()); ++i)
     {
       tmp *= tmp;
-      tmp %= this->Q;
+      tmp %= Q;
       if (auxiliary[i] == '1')
       {
         tmp *= Y;
-        tmp %= this->Q;
+        tmp %= Q;
       }
     }
     return tmp;
@@ -146,7 +146,7 @@ uint32_t diffie_hellman::create_u32_rand_value()
   //Pseudo-random generation based on Lagged Fibonacci algorithm
   std::ranlux48 random_value(rnd_seed()); //very slow for multiple numbers, but unpredictable with state
   //(3) Define the distribution <type of distribution> distribution(range start, range end)
-  std::uniform_int_distribution<uint32_t> distribution(1, this->Q-1);
+  std::uniform_int_distribution<uint32_t> distribution(1, Q-1);
   //(4) Produce the random number distribution(generator)
   return distribution(random_value);
 }
@@ -204,7 +204,7 @@ void diffie_hellman::create_uint32_n_store()
   std::string aux("");
 
   //I calc Ya
-  uint32_t Ya = this->calc_exp_mod(this->ALPHA, Xa, aux);
+  uint32_t Ya = this->calc_exp_mod(ALPHA, Xa, aux);
 
   //I need to append Xa and Ya to this->privkey_str / this->pubkey_str
   //but if aren't length == 8 then I need to append 0's first

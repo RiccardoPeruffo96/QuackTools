@@ -1,72 +1,71 @@
+/**
+ * @author Peruffo Riccardo, RP96, riccardoperuffo96@gmail.com, github.com/RiccardoPeruffo96
+ * @date 2022
+ * @file base64_sample.cpp
+ */
+
+#include <iostream>
+
 #include "base64.hpp"
 
 int main()
 {
-  //static uint8_t* base64_encode(uint8_t* input_string, int64_t length_string, int64_t mode = 0b1);
-	//static uint8_t* base64_decode(uint8_t* input_string, int64_t length_string, int64_t mode = 0b1);
-	//static int64_t base64_enc_size(int64_t length_string) { if (length_string == 0) { return 0; } return (((length_string + 2) / 3) * 4); }
-	//static int64_t base64_dec_size(uint8_t* input_string, int64_t length_string);
+  std::string input = "text to convert with base64";
 
-  uint8_t* data_to_hide = nullptr;
-  std::string scrt = "SECRET\t:)\n"; //data to hide and seek
-  data_to_hide = new uint8_t[scrt.length()];
-  //copy scrt to data_to_hide
-  uint64_t i = -1;
-  for(char letter : scrt)
+  //convert string into uint8_t*
+  int64_t input_length = input.length();
+  uint8_t* input_data = new uint8_t[input_length];
+  for(int64_t i = 0; i < input_length; ++i)
   {
-    data_to_hide[++i] = static_cast<uint8_t>(letter);
+    input_data[i] = static_cast<uint8_t>(input.at(i));
   }
 
-  //image's name
-  std::string img_name = "trust_me.jpg";
+  //now we have our input so finally we can use base64_encode and base64_decode
+  int64_t encoded_size = 0;
+  /*----------------------------------------------
+   * @brief encode with base64 protocol an input
+   * @param input_string input to convert
+   * @param length_string size(input_string)
+   * @param output_lenght length about new pointer
+   * @param mode = 0b1 define the convert array used followed base64_standards enum
+   * @return pointer to new text encoded
+   * static uint8_t* base64_encode(uint8_t* input_string, int64_t length_string, int64_t& output_lenght, int64_t mode = 0);
+   *----------------------------------------------*/
+  uint8_t* encoded_data = _base64_rp96_::base64::base64_encode(input_data, input_length, encoded_size);
 
-  //static void hide_file(
-    //uint8_t* bytes_data_file,
-    //int64_t bytes_data_length,
-    //std::string img_name_input
-  //);
-  _steganography_rp96_::steganography.hide_file(
-    data_to_hide,
-    scrt.length(),
-    img_name
-  ); //update the img with the input_file
+  //now decode
+  int64_t decoded_size = 0;
+  /*----------------------------------------------
+   * @brief decode with base64 protocol an input
+   * @param input_string input to convert
+   * @param length_string size(input_string)
+   * @param output_lenght length about new pointer
+   * @return pointer to new text decoded
+   * static uint8_t* base64_decode(uint8_t* input_string, int64_t length_string, int64_t& output_lenght);
+   *----------------------------------------------*/
+  uint8_t* decoded_data = _base64_rp96_::base64::base64_decode(encoded_data, encoded_size, decoded_size);
 
-  //static uint8_t* seek_file(
-    //std::string img_name_input,
-    //int64_t& bytes_data_length
-  //);
-  int64_t length_data_to_seek = 0;
-  uint8_t* data_to_seek = _steganography_rp96_::seek_file(
-    img_name,
-    length_data_to_seek
-  );
-
-  //final check if data_to_seek == data_to_hide
-  if(length_data_to_seek != scrt.length())
+  //then print all
+  for(int64_t i = 0; i < input_length; ++i)
   {
-    std::cout << "Something wrong: length\n";
-    delete[] data_to_hide;
-    data_to_hide = nullptr;
-    delete[] data_to_seek;
-    data_to_seek = nullptr;
-    return 0;
+    std::cout << input_data[i] << "\n"; //"text to convert with base64"
   }
-  for(auto i = 0; i < length_data_to_seek; ++i)
+  for(int64_t i = 0; i < encoded_size; ++i)
   {
-    if(data_to_seek[i] != data_to_hide[i])
-    {
-      std::cout << "Something wrong: data\n";
-      delete[] data_to_hide;
-      data_to_hide = nullptr;
-      delete[] data_to_seek;
-      data_to_seek = nullptr;
-      return 0;
-    }
+    std::cout << encoded_data[i] << "\n"; //"dGV4dCB0byBjb252ZXJ0IHdpdGggYmFzZTY0"
   }
-  std::cout << "All went well :)\n";
-  delete[] data_to_hide;
-  data_to_hide = nullptr;
-  delete[] data_to_seek;
-  data_to_seek = nullptr;
+  for(int64_t i = 0; i < decoded_size; ++i)
+  {
+    std::cout << decoded_data[i] << "\n"; //"text to convert with base64"
+  }
+
+  //delete and avoid memory segmentation
+  delete input_data;
+  input_data = nullptr;
+  delete encoded_data;
+  encoded_data = nullptr;
+  delete decoded_data;
+  decoded_data = nullptr;
+
   return 0;
 }

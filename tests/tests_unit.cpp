@@ -26,6 +26,239 @@ TEST_CASE( "test x10 times if a random couples of shared-hey with diffie_hellman
   REQUIRE( _tests_unit_rp96_::tests_diffie_hellman() == true );
 }
 
+bool _tests_unit_rp96_::tests_aes256()
+{
+  //----------------------------------------------------------
+  // we'll create x2 TEST:
+  // 01. from a input string, i use encrypt and decrypt
+  //     then check the decrypt are equals to input string;
+  // 02. from encrypted string i pass to another object
+  //     then check the decrypt are equals to input string;
+  //----------------------------------------------------------
+  //create a *char to encrypt
+  std::string i_str("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+  int64_t lim_sup = 0; //aux var
+
+  //store the var inside a uint8_t*
+  uint64_t i_str_l = i_str.length();
+  uint8_t* i_cstr = new uint8_t[i_str_l];
+  for(uint64_t i = 0; i < i_str_l; ++i)
+  {
+    i_cstr[i] = static_cast<uint8_t>(i_str.at(i));
+  }
+
+  //calculate a sha256 key from the input (every input goes well)
+  _sha256_rp96_::sha256 key = _sha256_rp96_::sha256(reinterpret_cast<char *>(i_cstr), i_str_l);
+  key.compute_hash();
+
+  //run a encrypt and a decrypt and check if the payload is equals to string
+  _aes256_rp96_::aes256 a256_encrypt01 = _aes256_rp96_::aes256(i_cstr, i_str_l, key.get_SHA256_string());
+  a256_encrypt01.encrypt();
+  a256_encrypt01.decrypt();
+
+  //test A: if after decrypt the results its equals to input;
+  int64_t test01_len =
+    a256_encrypt01.get_length_payload() + //payload length
+    a256_encrypt01.get_final_block_size(); //final block size length
+  //store first payload
+  uint8_t* test01_cstr = new uint8_t[test01_len];
+
+  //save the payload
+  for(int64_t i = 0; i < test01_len; ++i)
+  {
+    test01_cstr[i] = a256_encrypt01.get_payload()[i];
+  }
+
+  //check if the test is equals to the payload
+  for(uint64_t i = 0; i < i_str_l; ++i)
+  {
+    //if I found an element not equals
+    if(test01_cstr[i] != i_str.at(i))
+    {
+      delete[] i_cstr;
+      i_cstr = nullptr;
+      delete[] test01_cstr;
+      test01_cstr = nullptr;
+
+      return false;
+    }
+  }
+
+  //test B: if another object return the same input
+  a256_encrypt01.encrypt();
+
+  //store second test array
+  int64_t test02_len =
+    a256_encrypt01.get_length_payload() + //payload length
+    a256_encrypt01.get_final_block_size(); //final block size length
+  uint8_t* test02_cstr = new uint8_t[test02_len];
+
+  lim_sup = a256_encrypt01.get_length_payload();
+  //save the payload
+  for(int64_t i = 0; i < lim_sup; ++i)
+  {
+    test02_cstr[i] = a256_encrypt01.get_payload()[i];
+  }
+  //save the final block
+  if(a256_encrypt01.get_final_block() != nullptr)
+  {
+    lim_sup = a256_encrypt01.get_final_block_size();
+    for(int64_t i = a256_encrypt01.get_length_payload(), j = 0; j < lim_sup; ++i, ++j)
+    {
+      test02_cstr[i] = a256_encrypt01.get_final_block()[j];
+    }
+  }
+
+  //so I pass to another obj then decrypt it
+  _aes256_rp96_::aes256 a256_encrypt02 = _aes256_rp96_::aes256(test02_cstr, test02_len, key.get_SHA256_string());
+  a256_encrypt02.decrypt();
+
+  //store in another array anche check with input string
+  int64_t test03_len =
+    a256_encrypt02.get_length_payload() +
+    a256_encrypt02.get_final_block_size();
+  uint8_t* test03_cstr = new uint8_t[test03_len];
+
+  //save the payload
+  for(int64_t i = 0; i < test03_len; ++i)
+  {
+    test03_cstr[i] = a256_encrypt02.get_payload()[i];
+  }
+
+  //check output
+  for(uint64_t i = 0; i < i_str_l; ++i)
+  {
+    if(test03_cstr[i] != i_str.at(i))
+    {
+      delete[] i_cstr;
+      i_cstr = nullptr;
+      delete[] test01_cstr;
+      test01_cstr = nullptr;
+      delete[] test02_cstr;
+      test02_cstr = nullptr;
+      delete[] test03_cstr;
+      test03_cstr = nullptr;
+
+      return false;
+    }
+  }
+
+  delete[] i_cstr;
+  i_cstr = nullptr;
+  delete[] test01_cstr;
+  test01_cstr = nullptr;
+  delete[] test02_cstr;
+  test02_cstr = nullptr;
+  delete[] test03_cstr;
+  test03_cstr = nullptr;
+
+  return true;
+}
+
+bool _tests_unit_rp96_::tests_base64()
+{
+  //return true;
+  const int32_t times = 2000;
+  const uint32_t lim_min = 5;
+  const uint32_t lim_max = 512;
+  const uint32_t ascii_min = 0x00;
+  const uint32_t ascii_max = 0xFF;
+
+  for(auto idx = 0; idx < times; ++idx)
+  {
+    //generate n char with value from 0 to 127 (ASCII)
+    //n is random value between 5 and 512
+    uint8_t* test_data = nullptr;
+    int64_t test_size = -1;
+    std::random_device rnd_seed;
+    std::ranlux48 random_value(rnd_seed());
+    std::uniform_int_distribution<uint32_t> distribution(lim_min, lim_max);
+    std::uniform_int_distribution<uint8_t> distribution_ascii(ascii_min, ascii_max);
+
+    test_size = distribution(random_value);
+    test_data = new uint8_t[test_size];
+
+    for(int32_t i = 0; i < test_size; ++i)
+    {
+      test_data[i] = distribution_ascii(random_value);
+    }
+
+    int64_t encoded_size = -1;
+    uint8_t* encoded_data = _base64_rp96_::base64::base64_encode(
+      test_data, test_size, encoded_size);
+
+    int64_t decoded_size = -1;
+    uint8_t* decoded_data = _base64_rp96_::base64::base64_decode(
+      encoded_data, encoded_size, decoded_size);
+
+    delete[] encoded_data;
+    encoded_data = nullptr;
+
+    //last check
+    if(decoded_size != test_size)
+    {
+      delete[] test_data;
+      test_data = nullptr;
+      delete[] decoded_data;
+      decoded_data = nullptr;
+      return false;
+    }
+    for(int32_t i = 0; i < test_size; ++i)
+    {
+      if(test_data[i] != decoded_data[i])
+      {
+        delete[] test_data;
+        test_data = nullptr;
+        delete[] decoded_data;
+        decoded_data = nullptr;
+        return false;
+      }
+    }
+
+    delete[] test_data;
+    test_data = nullptr;
+    delete[] decoded_data;
+    decoded_data = nullptr;
+
+  }
+
+  return true;
+}
+
+bool _tests_unit_rp96_::tests_diffie_hellman()
+{
+  //number of tests
+  const auto NUM_UNITTEST_DIFFIEHELLMAN = 10;
+
+  for(auto i = 0; i < NUM_UNITTEST_DIFFIEHELLMAN; ++i)
+  {
+    //first i create objs that'll generate x2 public keys and x2 private keys
+    _diffie_hellman_rp96_::diffie_hellman test_pt1_var1 = _diffie_hellman_rp96_::diffie_hellman();
+    _diffie_hellman_rp96_::diffie_hellman test_pt1_var2 = _diffie_hellman_rp96_::diffie_hellman();
+
+    //calc the keys
+    test_pt1_var1.halfkey_generator_256bits();
+    test_pt1_var2.halfkey_generator_256bits();
+
+    //with second part I can use
+    _diffie_hellman_rp96_::diffie_hellman test_pt2_var1 = _diffie_hellman_rp96_::diffie_hellman(test_pt1_var1.get_private_string(), test_pt1_var2.get_public_string());
+    _diffie_hellman_rp96_::diffie_hellman test_pt2_var2 = _diffie_hellman_rp96_::diffie_hellman(test_pt1_var2.get_private_string(), test_pt1_var1.get_public_string());
+
+    //then calculate the shared key
+    test_pt2_var1.key_generator_from_halfkey_256bits();
+    test_pt2_var2.key_generator_from_halfkey_256bits();
+
+    //check the shared key, if are not equals, the tests is not passed
+    if(test_pt2_var1.get_shared_string().compare(test_pt2_var2.get_shared_string()) != 0)
+    {
+      return false;
+    }
+  }
+
+  //if i'm here the test is passed
+  return true;
+}
+
 bool _tests_unit_rp96_::tests_sha256()
 {
   std::vector<std::string> correct;
@@ -1053,173 +1286,5 @@ bool _tests_unit_rp96_::tests_sha256()
   }
   correct.clear();
 
-  return true;
-}
-
-bool _tests_unit_rp96_::tests_aes256()
-{
-  //----------------------------------------------------------
-  // we'll create x2 TEST:
-  // 01. from a input string, i use encrypt and decrypt
-  //     then check the decrypt are equals to input string;
-  // 02. from encrypted string i pass to another object
-  //     then check the decrypt are equals to input string;
-  //----------------------------------------------------------
-  //create a *char to encrypt
-  std::string i_str("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-  int64_t lim_sup = 0; //aux var
-
-  //store the var inside a uint8_t*
-  uint64_t i_str_l = i_str.length();
-  uint8_t* i_cstr = new uint8_t[i_str_l];
-  for(uint64_t i = 0; i < i_str_l; ++i)
-  {
-    i_cstr[i] = static_cast<uint8_t>(i_str.at(i));
-  }
-
-  //calculate a sha256 key from the input (every input goes well)
-  _sha256_rp96_::sha256 key = _sha256_rp96_::sha256(reinterpret_cast<char *>(i_cstr), i_str_l);
-  key.compute_hash();
-
-  //run a encrypt and a decrypt and check if the payload is equals to string
-  _aes256_rp96_::aes256 a256_encrypt01 = _aes256_rp96_::aes256(i_cstr, i_str_l, key.get_SHA256_string());
-  a256_encrypt01.encrypt();
-  a256_encrypt01.decrypt();
-
-  //test A: if after decrypt the results its equals to input;
-  int64_t test01_len =
-    a256_encrypt01.get_length_payload() + //payload length
-    a256_encrypt01.get_final_block_size(); //final block size length
-  //store first payload
-  uint8_t* test01_cstr = new uint8_t[test01_len];
-
-  //save the payload
-  for(int64_t i = 0; i < test01_len; ++i)
-  {
-    test01_cstr[i] = a256_encrypt01.get_payload()[i];
-  }
-
-  //check if the test is equals to the payload
-  for(uint64_t i = 0; i < i_str_l; ++i)
-  {
-    //if I found an element not equals
-    if(test01_cstr[i] != i_str.at(i))
-    {
-      delete[] i_cstr;
-      i_cstr = nullptr;
-      delete[] test01_cstr;
-      test01_cstr = nullptr;
-
-      return false;
-    }
-  }
-
-  //test B: if another object return the same input
-  a256_encrypt01.encrypt();
-
-  //store second test array
-  int64_t test02_len =
-    a256_encrypt01.get_length_payload() + //payload length
-    a256_encrypt01.get_final_block_size(); //final block size length
-  uint8_t* test02_cstr = new uint8_t[test02_len];
-
-  lim_sup = a256_encrypt01.get_length_payload();
-  //save the payload
-  for(int64_t i = 0; i < lim_sup; ++i)
-  {
-    test02_cstr[i] = a256_encrypt01.get_payload()[i];
-  }
-  //save the final block
-  if(a256_encrypt01.get_final_block() != nullptr)
-  {
-    lim_sup = a256_encrypt01.get_final_block_size();
-    for(int64_t i = a256_encrypt01.get_length_payload(), j = 0; j < lim_sup; ++i, ++j)
-    {
-      test02_cstr[i] = a256_encrypt01.get_final_block()[j];
-    }
-  }
-
-  //so I pass to another obj then decrypt it
-  _aes256_rp96_::aes256 a256_encrypt02 = _aes256_rp96_::aes256(test02_cstr, test02_len, key.get_SHA256_string());
-  a256_encrypt02.decrypt();
-
-  //store in another array anche check with input string
-  int64_t test03_len =
-    a256_encrypt02.get_length_payload() +
-    a256_encrypt02.get_final_block_size();
-  uint8_t* test03_cstr = new uint8_t[test03_len];
-
-  //save the payload
-  for(int64_t i = 0; i < test03_len; ++i)
-  {
-    test03_cstr[i] = a256_encrypt02.get_payload()[i];
-  }
-
-  //check output
-  for(uint64_t i = 0; i < i_str_l; ++i)
-  {
-    if(test03_cstr[i] != i_str.at(i))
-    {
-      delete[] i_cstr;
-      i_cstr = nullptr;
-      delete[] test01_cstr;
-      test01_cstr = nullptr;
-      delete[] test02_cstr;
-      test02_cstr = nullptr;
-      delete[] test03_cstr;
-      test03_cstr = nullptr;
-
-      return false;
-    }
-  }
-
-  delete[] i_cstr;
-  i_cstr = nullptr;
-  delete[] test01_cstr;
-  test01_cstr = nullptr;
-  delete[] test02_cstr;
-  test02_cstr = nullptr;
-  delete[] test03_cstr;
-  test03_cstr = nullptr;
-
-  return true;
-}
-
-bool _tests_unit_rp96_::tests_base64()
-{
-  return true;
-}
-
-bool _tests_unit_rp96_::tests_diffie_hellman()
-{
-  //number of tests
-  const auto NUM_UNITTEST_DIFFIEHELLMAN = 10;
-
-  for(auto i = 0; i < NUM_UNITTEST_DIFFIEHELLMAN; ++i)
-  {
-    //first i create objs that'll generate x2 public keys and x2 private keys
-    _diffie_hellman_rp96_::diffie_hellman test_pt1_var1 = _diffie_hellman_rp96_::diffie_hellman();
-    _diffie_hellman_rp96_::diffie_hellman test_pt1_var2 = _diffie_hellman_rp96_::diffie_hellman();
-
-    //calc the keys
-    test_pt1_var1.halfkey_generator_256bits();
-    test_pt1_var2.halfkey_generator_256bits();
-
-    //with second part I can use
-    _diffie_hellman_rp96_::diffie_hellman test_pt2_var1 = _diffie_hellman_rp96_::diffie_hellman(test_pt1_var1.get_private_string(), test_pt1_var2.get_public_string());
-    _diffie_hellman_rp96_::diffie_hellman test_pt2_var2 = _diffie_hellman_rp96_::diffie_hellman(test_pt1_var2.get_private_string(), test_pt1_var1.get_public_string());
-
-    //then calculate the shared key
-    test_pt2_var1.key_generator_from_halfkey_256bits();
-    test_pt2_var2.key_generator_from_halfkey_256bits();
-
-    //check the shared key, if are not equals, the tests is not passed
-    if(test_pt2_var1.get_shared_string().compare(test_pt2_var2.get_shared_string()) != 0)
-    {
-      return false;
-    }
-  }
-
-  //if i'm here the test is passed
   return true;
 }

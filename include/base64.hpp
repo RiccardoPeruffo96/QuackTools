@@ -45,6 +45,33 @@ namespace _base64_rp96_
   constexpr char conversion__(char input);
 
   /**
+   * @brief take less significant x6 bits about first value and concat with
+   * most significant x2 bits about second value then return the byte
+   * @param v01 first value about less significant x6 bits
+   * @param v02 second value about most significant x2 bits
+   * @return concat about x6bits||x2bits
+   */
+  constexpr uint8_t concat01(int8_t v01, int8_t v02);
+
+  /**
+   * @brief take less significant x4 bits about first value and concat with
+   * most significant x4 bits about second value then return the byte
+   * @param v01 first value about less significant x4 bits
+   * @param v02 second value about most significant x4 bits
+   * @return concat about x4bits||x4bits
+   */
+  constexpr uint8_t concat02(int8_t v01, int8_t v02);
+
+  /**
+   * @brief take less significant x2 bits about first value and concat with
+   * most significant x6 bits about second value then return the byte
+   * @param v01 first value about less significant x2 bits
+   * @param v02 second value about most significant x6 bits
+   * @return concat about x2bits||x6bits
+   */
+  constexpr uint8_t concat03(int8_t v01, int8_t v02);
+
+  /**
    * @brief this class contains the minimum number of methods
    * to use the base64 standard and integrate with custom code
    */
@@ -56,18 +83,20 @@ namespace _base64_rp96_
      * @brief encode with base64 protocol an input
      * @param input_string input to convert
      * @param length_string size(input_string)
+     * @param output_lenght length about new pointer
      * @param mode = 0b1 define the convert array used followed base64_standards enum
      * @return pointer to new text encoded
      */
-    static uint8_t* base64_encode(uint8_t* input_string, int64_t length_string, int64_t mode = 0);
+    static uint8_t* base64_encode(uint8_t* input_string, int64_t length_string, int64_t& output_lenght, int64_t mode = 0);
 
     /**
      * @brief decode with base64 protocol an input
      * @param input_string input to convert
      * @param length_string size(input_string)
+     * @param output_lenght length about new pointer
      * @return pointer to new text decoded
      */
-    static uint8_t* base64_decode(uint8_t* input_string, int64_t length_string);
+    static uint8_t* base64_decode(uint8_t* input_string, int64_t length_string, int64_t& output_lenght);
 
     /**
      * @brief from an hypothetical input length, return the exact size needed to stored the same input but after the encode
