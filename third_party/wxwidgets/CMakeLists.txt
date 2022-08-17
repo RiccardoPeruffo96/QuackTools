@@ -19,7 +19,7 @@ else()
     else()
       message(STATUS "Preinstalled GTK3 not found")
       message(STATUS "GTK3 will be installed...")
-      execute_process(COMMAND sudo apt-get install -y libgtk-3-dev COMMAND_ERROR_IS_FATAL ANY)
+      execute_process(COMMAND sudo apt-get install -y libgtk-3-dev)
       message(STATUS "GTK3 installed, now we'll start with wxWidgets...")
     endif()
     
