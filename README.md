@@ -25,13 +25,14 @@ This program follows c++17 standards.
    2. ``cd QuackTools``
    3. ``mkdir build``
    4. ``cd build``
-   5. ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release ..``
+   5. ``CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release ..``
+       * or ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release ..``
    6. ``make install``
        * ``make test`` (optional)
        * ``make doc`` (optional)
    7. ``make run``
 
-Note: You can choose to use ``CC=gcc CXX=g++`` instead ``CC=clang CXX=clang++``
+Note: if clang-tidy is not defined, .clang-tidy it will be ignored.
 
 ## Different compile options
 
@@ -45,6 +46,7 @@ Note: You can choose to use ``CC=gcc CXX=g++`` instead ``CC=clang CXX=clang++``
 This code use:
  * wxWidgets to implements GUI (https://github.com/wxWidgets/wxWidgets);
  * Catch2 to implements tests (https://github.com/catchorg/Catch2);
+   * like the follow fedora patch (https://src.fedoraproject.org/rpms/catch1/blob/rawhide/f/catch1-sigstksz.patch), i'll change the var SIGSTKSZ with the const value 32768 (32 x 1024) because a well known issue (https://github.com/mapbox/variant/issues/183)
  * Doxygen for documentation (https://github.com/doxygen/doxygen);
  * Cmake to generate Makefile (https://github.com/Kitware/CMake);
  * OpenCV to work with medias (https://github.com/opencv/opencv);

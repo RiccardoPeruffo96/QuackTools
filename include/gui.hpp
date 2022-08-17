@@ -24,7 +24,7 @@
   #include "sha256.hpp"
   #include "steganography.hpp"
 
-  #include <jsoncpp/json/json.h> //Json::Value
+  #include <json/json.h> //Json::Value
 
   #include <wx/wxprec.h> //wxWidgets
 
