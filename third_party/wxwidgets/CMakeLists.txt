@@ -1,50 +1,33 @@
-# check if wxWidgets is already installed in the system - using CMake's built in script FindwxWidgets
+# check if wxWidgets is already installed in the system - using CMake's built in script FindwxWidget
 find_package(wxWidgets QUIET)
 
+#01. clone git and build it
 if (wxWidgets_FOUND)
-    message(STATUS "Found preinstalled wxWidgets libraries at ${wxWidgets_LIBRARIES}")
-    add_library(wxWidgets_external INTERFACE)
+    message(STATUS "Found preinstalled wxWidgets libraries")
 else()
-    message(STATUS "Preinstalled wxWidgets not found.")
-    message(STATUS "Will download and install wxWidgets in ${STAGED_INSTALL_PREFIX}")
+    message(STATUS "Preinstalled wxWidgets not found")
+    message(STATUS "wxWidgets will be installed...")
+    
+    #02. search about gtk+-3.0 prerequired (not optional)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK3 QUIET gtk+-3.0)
 
-    include(ExternalProject)
-    ExternalProject_Add(wxWidgets_external
-        GIT_REPOSITORY
-        https://github.com/wxWidgets/wxWidgets.git
-        GIT_TAG
-        master
-        UPDATE_COMMAND
-        ""
-        CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${STAGED_INSTALL_PREFIX}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-        -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
-        -DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
-        -DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}
-        -DwxBUILD_SHARED=OFF
-        CMAKE_CACHE_ARGS
-        -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
-        TEST_AFTER_INSTALL
-        0
-        DOWNLOAD_NO_PROGRESS
-        1
-        LOG_CONFIGURE
-        1
-        LOG_BUILD
-        1
-        LOG_INSTALL
-        1
-        )
-
-
-    set(wxWidgets_ROOT_DIR ${STAGED_INSTALL_PREFIX})
-    file(TO_NATIVE_PATH "${wxWidgets_ROOT_DIR}" wxWidgets_ROOT_DIR)
-    set(wxWidgets_ROOT_DIR ${wxWidgets_ROOT_DIR} CACHE INTERNAL "wxWidgets installation dir")
-
-    set (ENV_WX_CONFIG ${STAGED_INSTALL_PREFIX}/bin/wx-config)
-    file (TO_NATIVE_PATH "${ENV_WX_CONFIG}" ENV_WX_CONFIG)
-    set(ENV_WX_CONFIG ${ENV_WX_CONFIG} CACHE INTERNAL "wx-config dir")
-
+    if(GTK3_FOUND)
+      message(STATUS "Found preinstalled GTK3, now we'll start with wxWidgets...")
+    else()
+      message(STATUS "Preinstalled GTK3 not found")
+      message(STATUS "GTK3 will be installed...")
+      execute_process(COMMAND sudo apt-get install -y libgtk-3-dev COMMAND_ERROR_IS_FATAL ANY)
+      message(STATUS "GTK3 installed, now we'll start with wxWidgets...")
+    endif()
+    
+    #03. clone the git then install it
+    execute_process(COMMAND rm -r -f ${CMAKE_CURRENT_SOURCE_DIR}/build)
+    execute_process(COMMAND mkdir ${CMAKE_CURRENT_SOURCE_DIR}/build)
+    execute_process(COMMAND chmod +x ../script/install_wxgtk3.sh)
+    execute_process(COMMAND ./../script/install_wxgtk3.sh ${CMAKE_CURRENT_SOURCE_DIR}/build)
+    
+    message(STATUS "wxWidgets correctly installed")
 endif()
+
+add_library(wxWidgets_external INTERFACE)

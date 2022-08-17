@@ -16,20 +16,29 @@ set(CMAKE_CXX_EXTENSIONS OFF) # no compiler extensions
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 
 #set CLANG-TIDY
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_CLANG_TIDY
-  clang-tidy;
-  -format-style='file';
-  -header-filter=${CMAKE_CURRENT_SOURCE_DIR};
-)
+if(COMMAND clang-tidy)
+  message(STATUS "clang-tidy")
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+  set(CMAKE_CXX_CLANG_TIDY
+    clang-tidy;
+    -format-style='file';
+    -header-filter=${CMAKE_CURRENT_SOURCE_DIR};
+  )
+else()
+  message(STATUS "clang-tidy not found")
+endif()
 
 #set to enable multi-threads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+
 #abort the process if you can't use a multithreads program
 find_package(Threads REQUIRED)
 
 #I declare the output release it's build/ folder
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
+#add third_party_libraries
+add_subdirectory(third_party)
 
 #add the CMakeLists file to create the final program
 add_subdirectory(source)
@@ -140,5 +149,3 @@ else() #elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
   message("RELEASE mode") # cmake already adds "-O3 -DNDEBUG"
 
 endif()
-
-#add_subdirectory(third_party)
