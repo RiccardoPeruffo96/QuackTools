@@ -1,4 +1,6 @@
 # check if wxWidgets is already installed in the system - using CMake's built in script FindwxWidget
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR) #minimum version
+
 find_package(wxWidgets QUIET)
 
 #01. clone git and build it

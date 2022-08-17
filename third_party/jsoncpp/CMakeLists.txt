@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR) #minimum version
 find_package(jsoncpp QUIET)
 
 #01. clone git and build it

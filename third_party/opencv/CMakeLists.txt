@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR) #minimum version
 find_package(OpenCV QUIET)
 
 #01. check if exists
