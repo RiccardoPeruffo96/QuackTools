@@ -26,7 +26,7 @@ This program follows c++17 standards.
    3. ``mkdir build``
    4. ``cd build``
    5. ``sudo CC=gcc CXX=g++ cmake -DCMAKE_BUILD_TYPE=Release ..``
-       * or ``CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release ..``
+       * or ``sudo CC=clang CXX=clang++ cmake -DCMAKE_BUILD_TYPE=Release ..``
    6. ``make install``
        * ``make test`` (optional)
        * ``make doc`` (optional)
