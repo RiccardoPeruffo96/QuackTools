@@ -17,11 +17,10 @@ else()
     else()
       message(STATUS "Preinstalled GTK3 not found")
       message(STATUS "GTK3 will be installed...")
-      #execute_process(COMMAND sudo apt-get install -y libgtk-3-dev COMMAND_ERROR_IS_FATAL ANY)
+      execute_process(COMMAND sudo apt-get install -y libgtk-3-dev COMMAND_ERROR_IS_FATAL ANY)
       message(STATUS "GTK3 installed, now we'll start with wxWidgets...")
     endif()
     
-    #execute_process(COMMAND sudo apt-get install -y libwxgtk3.0-gtk3-dev COMMAND_ERROR_IS_FATAL ANY)
     #03. clone the git then install it
     execute_process(COMMAND rm -r -f ${CMAKE_CURRENT_SOURCE_DIR}/build)
     execute_process(COMMAND mkdir ${CMAKE_CURRENT_SOURCE_DIR}/build)
