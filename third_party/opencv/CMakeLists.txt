@@ -9,7 +9,8 @@ else()
     message(STATUS "Opencv will be installed...")
     
     #02. install from repository
-    execute_process(COMMAND sudo apt-get install -y libopencv-dev python3-opencv)
+    execute_process(COMMAND sudo apt-get update --fix-missing -y)
+    execute_process(COMMAND sudo apt-get install -y libopencv-dev)
     
     message(STATUS "Opencv correctly installed")
 endif()
