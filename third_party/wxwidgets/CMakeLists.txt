@@ -19,16 +19,21 @@ else()
     else()
       message(STATUS "Preinstalled GTK3 not found")
       message(STATUS "GTK3 will be installed...")
-      execute_process(COMMAND sudo apt-get update --fix-missing -y)
-      execute_process(COMMAND sudo apt-get install -y libgtk-3-dev)
+      execute_process(COMMAND sudo apt update --fix-missing)
+      execute_process(COMMAND sudo apt install -y libgtk-3-dev)
       message(STATUS "GTK3 installed, now we'll start with wxWidgets...")
     endif()
     
     #03. clone the git then install it
+    
+    execute_process(COMMAND sudo apt update --fix-missing)
+    execute_process(COMMAND sudo apt install -y libwxgtk3.0-dev)
+    if (NOT wxWidgets_FOUND)
     execute_process(COMMAND rm -r -f ${CMAKE_CURRENT_SOURCE_DIR}/build)
     execute_process(COMMAND mkdir ${CMAKE_CURRENT_SOURCE_DIR}/build)
     execute_process(COMMAND chmod +x ../script/install_wxgtk3.sh)
     execute_process(COMMAND ./../script/install_wxgtk3.sh ${CMAKE_CURRENT_SOURCE_DIR}/build)
+    endif()
     
     message(STATUS "wxWidgets correctly installed")
 endif()
