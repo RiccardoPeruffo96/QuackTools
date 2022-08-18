@@ -20,7 +20,7 @@ This program follows c++17 standards.
 
 ## How to compile the source
 
- * Linux systems: open the bash and follow the nexts commands (minimum requirement ``build essential`` and ``cmake version >= 15`` already installed, others dipendencies will be installed automatically)
+ * Linux systems: open the bash and follow the nexts commands (minimum requirement ``build essential``, ``cmake version >= 15`` and ``git`` already installed, others dipendencies will be installed automatically)
    1. ``git clone https://github.com/RiccardoPeruffo96/QuackTools.git``
    2. ``cd QuackTools``
    3. ``mkdir build``

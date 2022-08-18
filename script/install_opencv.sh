@@ -4,6 +4,7 @@ echo "-- start cloning opencv..."
 wget -O $1/opencv.zip https://github.com/opencv/opencv/archive/master.zip
 unzip $1/opencv.zip -d $1
 mv $1/opencv-master $1/opencv
+rm -f $1/opencv.zip
 
 echo "-- moving to opencv/build"
 mkdir $1/opencv/build
