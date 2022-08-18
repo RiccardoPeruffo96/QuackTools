@@ -25,15 +25,10 @@ else()
     endif()
     
     #03. clone the git then install it
-    
-    execute_process(COMMAND sudo apt update --fix-missing)
-    execute_process(COMMAND sudo apt install -y libwxgtk3.0-dev)
-    if (NOT wxWidgets_FOUND)
     execute_process(COMMAND rm -r -f ${CMAKE_CURRENT_SOURCE_DIR}/build)
     execute_process(COMMAND mkdir ${CMAKE_CURRENT_SOURCE_DIR}/build)
     execute_process(COMMAND chmod +x ../script/install_wxgtk3.sh)
     execute_process(COMMAND ./../script/install_wxgtk3.sh ${CMAKE_CURRENT_SOURCE_DIR}/build)
-    endif()
     
     message(STATUS "wxWidgets correctly installed")
 endif()
