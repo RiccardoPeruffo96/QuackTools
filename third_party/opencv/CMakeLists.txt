@@ -9,9 +9,9 @@ else()
     message(STATUS "Opencv will be installed...")
     
     #02. install from repository
-    #execute_process(COMMAND sudo apt update --fix-missing)
+    execute_process(COMMAND sudo apt update --fix-missing)
     message(STATUS "Searching opencv in public repository...")
-    #execute_process(COMMAND sudo apt install -y libopencv-dev)
+    execute_process(COMMAND sudo apt install -y libopencv-dev)
 
     #03. clone the git then install it if repository doesn't work
     if (NOT OpenCV_FOUND)
