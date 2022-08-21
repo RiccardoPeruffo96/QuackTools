@@ -15,7 +15,7 @@ else()
 
     #03. clone the git then install it if repository doesn't work
     if (NOT OpenCV_FOUND)
-      message(STATUS "Installing opencv from repository has some problem...")
+      message(STATUS "Can't install opencv from repository...")
       message(STATUS "Install opencv from git...")
       execute_process(COMMAND rm -r -f ${CMAKE_CURRENT_SOURCE_DIR}/build)
       execute_process(COMMAND mkdir ${CMAKE_CURRENT_SOURCE_DIR}/build)
