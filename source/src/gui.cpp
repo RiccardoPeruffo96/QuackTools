@@ -2481,8 +2481,11 @@ void MyFrame::button_calc_aes256(wxCommandEvent& event)
   //user_file == desktop/personal/file.txt
   //user_file.parent_path() == desktop/personal/
   //user_file.parent_path().parent_path() == desktop/
-  if(user_file.parent_path().parent_path() == this->user_datas &&
-    new_file_name.compare(user_file.stem()) == 0)
+  //if(user_file.parent_path().parent_path() == this->user_datas && new_file_name.compare(user_file.stem()) == 0)
+  std::string tmp_name = new_file_name;
+  tmp_name += user_file.extension();
+  std::filesystem::path hypotetical_new_file{tmp_name};
+  if(std::filesystem::exists(hypotetical_new_file))
   {
     new_file_name += "_";
     new_file_name += std::to_string(check_non_exists_file(new_file_name, user_file.extension()));
