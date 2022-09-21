@@ -193,7 +193,7 @@ aes256& aes256::operator=(aes256&& a256) noexcept(true)
   return *this;
 }
 
-aes256::~aes256() noexcept(true) 
+aes256::~aes256() noexcept(true)
 {
   //doesn't call delete because aes doesn't copy the data
   this->payload = nullptr;
@@ -364,7 +364,9 @@ void aes256::decrypt()
   */
 
   for (auto& _single_thread : _thread_list)
+  {
     _single_thread.join();
+  }
   _thread_list.clear();
 
   //after encrypt every file needs to have this->value_CMS == 0 because padding

@@ -1718,8 +1718,8 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
         }
         else
         {
-          out_text = std::string(reinterpret_cast<char*>(input_text));
-          out_text.resize(input_length);
+          out_text = std::string(reinterpret_cast<char*>(input_text), input_length);
+          //out_text.resize(input_length);
         }
         //update the gui
         txtctrl_output->AppendText(out_text);
@@ -1752,8 +1752,8 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
       }
       else
       {
-        out_text = std::string(reinterpret_cast<char*>(input_text));
-        out_text.resize(input_length);
+        out_text = std::string(reinterpret_cast<char*>(input_text), input_length);
+        //out_text.resize(input_length);
       }
       //update the gui
       txtctrl_output->AppendText(out_text);
@@ -1765,8 +1765,8 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
     }
 
     //then clean the value and return
-    delete[] input_text;
-    input_text = nullptr;
+    //delete[] input_text;
+    //input_text = nullptr;
 
     event.Skip();
     return;
@@ -1820,8 +1820,8 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
       }
       else
       {
-        out_text = std::string(reinterpret_cast<char*>(input_text));
-        out_text.resize(input_length);
+        out_text = std::string(reinterpret_cast<char*>(input_text), input_length);
+        //out_text.resize(input_length);
       }
       //update the gui
       txtctrl_output->AppendText(out_text);
@@ -1850,15 +1850,15 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
 
   std::string out_text("");
   input_text = nullptr;
-  int64_t len_output = -1;
+  //int64_t len_output = -1;
 
   if(do_i_have_enc->GetValue() == FLAGGED)
   {
-    input_text = _base64_rp96_::base64::base64_encode(buffer_txt, buffer_len, len_output, standard_used->GetSelection());
+    input_text = _base64_rp96_::base64::base64_encode(buffer_txt, buffer_len, input_length, standard_used->GetSelection());
   }
   else
   {
-    input_text = _base64_rp96_::base64::base64_decode(buffer_txt, buffer_len, len_output);
+    input_text = _base64_rp96_::base64::base64_decode(buffer_txt, buffer_len, input_length);
   }
 
   if(input_text == nullptr)
@@ -1867,8 +1867,8 @@ void MyFrame::button_calc_b64(wxCommandEvent& event)
   }
   else
   {
-    out_text = std::string(reinterpret_cast<char*>(input_text));
-    out_text.resize(len_output);
+    out_text = std::string(reinterpret_cast<char*>(input_text), input_length);
+    //out_text.resize(len_output);
   }
 
   txtctrl_output->AppendText(out_text);
